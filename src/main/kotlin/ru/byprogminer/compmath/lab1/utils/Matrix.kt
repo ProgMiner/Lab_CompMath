@@ -1,18 +1,28 @@
-package ru.byprogminer.compmath.lab1
+package ru.byprogminer.compmath.lab1.utils
 
-import ru.byprogminer.compmath.lab1.utils.Fraction
-
-class Matrix(val rows: Int, val cols: Int) {
-
-    private val matrix = Array(rows * cols) { Fraction.ZERO }
+class Matrix
+private constructor(
+        val rows: Int,
+        val cols: Int,
+        private val matrix: Array<Fraction>
+) {
 
     private val rowAccessors = mutableMapOf<Int, RowAccessor>()
     private val columnAccessors = mutableMapOf<Int, ColumnAccessor>()
 
-    constructor(matrix: Matrix): this(matrix.rows, matrix.cols) {
-        System.arraycopy(matrix.matrix, 0, this.matrix, 0, rows * cols)
-    }
+    /**
+     * Default constructor
+     */
+    constructor(rows: Int, cols: Int): this(rows, cols, Array(rows * cols) { Fraction.ZERO })
 
+    /**
+     * Copy constructor
+     */
+    constructor(matrix: Matrix): this(matrix.rows, matrix.cols, matrix.matrix.clone())
+
+    /**
+     * Swaps two rows in the matrix
+     */
     fun swapRows(a: Int, b: Int) {
         if (a >= rows || b >= rows) {
             throw ArrayIndexOutOfBoundsException("row numbers must be less than rows count")

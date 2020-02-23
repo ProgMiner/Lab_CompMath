@@ -1,4 +1,4 @@
-package ru.byprogminer.compmath.lab1
+package ru.byprogminer.compmath.lab1.linearsystem
 
 /**
  * Makes square linear system triangle using Gaussian method with main element selecting

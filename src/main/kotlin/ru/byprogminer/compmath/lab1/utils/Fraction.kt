@@ -15,17 +15,15 @@ class Fraction(numerator: BigInteger, denominator: BigInteger): Number(), Compar
 
         val ZERO = Fraction(BigInteger.ZERO, BigInteger.ONE)
         val ONE = Fraction(BigInteger.ONE, BigInteger.ONE)
-
-        fun valueOf(a: Long) = Fraction(BigInteger.valueOf(a), BigInteger.ONE)
-        fun valueOf(a: BigInteger) = Fraction(a, BigInteger.ONE)
-        fun valueOf(a: Double) = valueOf(BigDecimal.valueOf(a))
-        fun valueOf(a: BigDecimal) = a.stripTrailingZeros().run {
-            Fraction(a.unscaledValue(), BigInteger.TEN.pow(a.scale()))
-        }
     }
 
     private val numerator: BigInteger
     private val denominator: BigInteger
+
+    constructor(a: BigInteger): this(a, BigInteger.ONE)
+    constructor(a: Long): this(BigInteger.valueOf(a), BigInteger.ONE)
+    constructor(a: BigDecimal): this(a.unscaledValue(), BigInteger.TEN.pow(a.scale()))
+    constructor(a: Double): this(BigDecimal.valueOf(a))
 
     init {
         if (denominator < BigInteger.ZERO) {
@@ -74,8 +72,8 @@ class Fraction(numerator: BigInteger, denominator: BigInteger): Number(), Compar
     override fun toChar(): Char = toLong().toChar()
     override fun toByte(): Byte = toLong().toByte()
 
-    override fun toDouble(): Double = BigDecimal(numerator, MathContext.DECIMAL128)
-            .divide(denominator.toBigDecimal()).toDouble()
+    override fun toDouble(): Double =
+            (BigDecimal(numerator, MathContext.DECIMAL128) / denominator.toBigDecimal()).toDouble()
     override fun toFloat(): Float = toDouble().toFloat()
 
     override fun toString(): String = if (denominator == BigInteger.ONE) {
@@ -94,9 +92,5 @@ class Fraction(numerator: BigInteger, denominator: BigInteger): Number(), Compar
         return true
     }
 
-    override fun hashCode(): Int {
-        var result = numerator.hashCode()
-        result = 31 * result + denominator.hashCode()
-        return result
-    }
+    override fun hashCode(): Int = (numerator to denominator).hashCode()
 }

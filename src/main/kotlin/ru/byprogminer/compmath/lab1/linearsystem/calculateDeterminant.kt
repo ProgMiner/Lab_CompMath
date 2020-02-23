@@ -1,4 +1,6 @@
-package ru.byprogminer.compmath.lab1
+package ru.byprogminer.compmath.lab1.linearsystem
+
+import ru.byprogminer.compmath.lab1.utils.Matrix
 
 /**
  * Calculates determinant of triangle matrix

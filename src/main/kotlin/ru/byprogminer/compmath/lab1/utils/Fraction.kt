@@ -3,6 +3,7 @@ package ru.byprogminer.compmath.lab1.utils
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.MathContext
+import kotlin.math.max
 
 /**
  * Number in fractional form
@@ -22,18 +23,39 @@ class Fraction(numerator: BigInteger, denominator: BigInteger): Number(), Compar
 
     constructor(a: BigInteger): this(a, BigInteger.ONE)
     constructor(a: Long): this(BigInteger.valueOf(a), BigInteger.ONE)
-    constructor(a: BigDecimal): this(a.unscaledValue(), BigInteger.TEN.pow(a.scale()))
+    constructor(a: BigDecimal): this(a.unscaledValue(), BigInteger.TEN.pow(max(a.scale(), 0)))
     constructor(a: Double): this(BigDecimal.valueOf(a))
 
+    private constructor(fraction: Fraction): this(fraction.numerator, fraction.denominator)
+    constructor(s: String): this(s.let {
+        if (s.contains('/')) {
+            val components = s.split('/')
+
+            if (components.size != 2) {
+                throw NumberFormatException("for input string: $s")
+            }
+
+            Fraction(BigDecimal(components[0])) / Fraction(BigDecimal(components[1]))
+        } else {
+            Fraction(BigDecimal(s))
+        }
+    })
+
     init {
-        if (denominator < BigInteger.ZERO) {
-            throw IllegalArgumentException("denominator cannot be negative")
+        fun init(numerator: BigInteger, denominator: BigInteger): Pair<BigInteger, BigInteger> {
+            val gcd = gcd(numerator, denominator)
+
+            return numerator / gcd to denominator / gcd
         }
 
-        val gcd = gcd(numerator, denominator)
+        val (n, d) = if (denominator > BigInteger.ZERO) {
+            init(numerator, denominator)
+        } else {
+            init(BigInteger.ZERO - numerator, BigInteger.ZERO - denominator)
+        }
 
-        this.numerator = numerator / gcd
-        this.denominator = denominator / gcd
+        this.numerator = n
+        this.denominator = d
     }
 
     operator fun plus(that: Fraction) = Fraction(
@@ -76,10 +98,10 @@ class Fraction(numerator: BigInteger, denominator: BigInteger): Number(), Compar
             (BigDecimal(numerator, MathContext.DECIMAL128) / denominator.toBigDecimal()).toDouble()
     override fun toFloat(): Float = toDouble().toFloat()
 
-    override fun toString(): String = if (denominator == BigInteger.ONE) {
-        "$numerator"
-    } else {
+    override fun toString(): String = if (denominator != BigInteger.ONE) {
         "$numerator/$denominator"
+    } else {
+        "$numerator"
     }
 
     override fun equals(other: Any?): Boolean {

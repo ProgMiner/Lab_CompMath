@@ -30,6 +30,12 @@ class LinearSystem(val A: Matrix, val b: Array<Fraction>) {
         this.b[b] = tmp
     }
 
-    override fun toString() = (0 until A.rows).map { A.row(it) to b[it] }
-            .joinToString("\n") { (0 until A.cols).map(it.first::get).joinToString("\t") + "\t| " + it.second }
+    fun toString(vararg vars: String) = (0 until A.rows).map { A.row(it) to b[it] }
+            .joinToString("\n") { (0 until A.cols).map(it.first::get).mapIndexed { i, c -> if (i > 0) {
+                "${if (c.toDouble() >= 0) "+" else "-"} ${c.toString().removePrefix("-")} ${vars[i]}"
+            } else {
+                "$c ${vars[i]}"
+            } }.joinToString(" ") + " = ${it.second}" }
+
+    override fun toString() = toString(*Array(A.cols) { "x_${it + 1}" })
 }

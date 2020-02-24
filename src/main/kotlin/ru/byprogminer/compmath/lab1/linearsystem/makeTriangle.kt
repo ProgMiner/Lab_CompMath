@@ -1,5 +1,7 @@
 package ru.byprogminer.compmath.lab1.linearsystem
 
+import ru.byprogminer.compmath.lab1.utils.Fraction
+
 /**
  * Makes square linear system triangle using Gaussian method with main element selecting
  *
@@ -12,6 +14,10 @@ fun LinearSystem.makeTriangle() {
 
     for (element in 0 until A.cols - 1) {
         selectMainElement(element)
+
+        if (A.column(element)[element] == Fraction.ZERO) {
+            continue
+        }
 
         for (row in element + 1 until A.rows) {
             val coefficient = A.column(element)[row] / A.column(element)[element]

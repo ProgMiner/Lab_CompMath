@@ -181,12 +181,13 @@ private fun calculate(system: LinearSystem) {
         return
     }
 
-    system.makeTriangle()
+    val triangle = LinearSystem(system)
+    triangle.makeTriangle()
     println("Triangle matrix:")
     println(system)
     println()
 
-    val det = system.A.calculateDeterminant()
+    val det = triangle.A.calculateDeterminant()
     println("Determinant: $det.")
     println()
 
@@ -196,7 +197,7 @@ private fun calculate(system: LinearSystem) {
     }
 
     println("Roots:")
-    val roots = system.calculateRoots()
+    val roots = triangle.calculateRoots().map(Fraction::toDouble).toTypedArray()
     println(roots.mapIndexed { i, x -> "x_${i + 1} = $x" }.joinToString("\n"))
     println()
 

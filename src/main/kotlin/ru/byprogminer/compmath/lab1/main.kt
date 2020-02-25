@@ -1,11 +1,10 @@
 package ru.byprogminer.compmath.lab1
 
 import ru.byprogminer.compmath.lab1.linearsystem.*
-import ru.byprogminer.compmath.lab1.utils.Matrix
 import ru.byprogminer.compmath.lab1.utils.Fraction
+import ru.byprogminer.compmath.lab1.utils.Matrix
 import java.nio.file.Files
 import java.nio.file.Paths
-import kotlin.NumberFormatException
 import kotlin.random.Random
 import kotlin.system.exitProcess
 
@@ -161,7 +160,7 @@ private fun generateRandomSystem(): LinearSystem? {
     random.nextInt()
     random.nextInt()
 
-    fun nextRandom() = Fraction((random.nextInt(10000) * random.nextFloat()).toDouble())
+    fun nextRandom() = Fraction(random.nextInt(-100, 100).toLong())
 
     val linearSystem = LinearSystem(Matrix(n, n), Array(n) { nextRandom() })
     for (i in 0 until linearSystem.A.rows * linearSystem.A.cols) {
@@ -184,7 +183,7 @@ private fun calculate(system: LinearSystem) {
     val triangle = LinearSystem(system)
     triangle.makeTriangle()
     println("Triangle matrix:")
-    println(system)
+    println(triangle)
     println()
 
     val det = triangle.A.calculateDeterminant()

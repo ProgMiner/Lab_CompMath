@@ -2,7 +2,6 @@ package ru.byprogminer.compmath.lab1.utils
 
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.math.MathContext
 import kotlin.math.max
 
 /**
@@ -95,7 +94,7 @@ class Fraction(numerator: BigInteger, denominator: BigInteger): Number(), Compar
     override fun toByte(): Byte = toLong().toByte()
 
     override fun toDouble(): Double =
-            (BigDecimal(numerator, MathContext.DECIMAL128) / denominator.toBigDecimal()).toDouble()
+            (BigDecimal(numerator).setScale(128) / denominator.toBigDecimal()).toDouble()
     override fun toFloat(): Float = toDouble().toFloat()
 
     override fun toString(): String = if (denominator != BigInteger.ONE) {

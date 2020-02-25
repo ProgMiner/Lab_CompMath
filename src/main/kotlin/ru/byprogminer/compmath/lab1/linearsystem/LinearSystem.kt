@@ -1,7 +1,7 @@
 package ru.byprogminer.compmath.lab1.linearsystem
 
-import ru.byprogminer.compmath.lab1.utils.Matrix
 import ru.byprogminer.compmath.lab1.utils.Fraction
+import ru.byprogminer.compmath.lab1.utils.Matrix
 
 class LinearSystem(val A: Matrix, val b: Array<Fraction>) {
 

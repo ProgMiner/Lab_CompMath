@@ -22,8 +22,8 @@ fun LinearSystem.makeTriangle() {
         for (row in element + 1 until A.rows) {
             val coefficient = A.column(element)[row] / A.column(element)[element]
 
-            for (column in 0 until A.cols) {
-                A.row(row)[column] -= A.row(element)[column] * coefficient
+            for (column in element until A.cols) {
+                A.column(column)[row] -= A.column(column)[element] * coefficient
             }
 
             b[row] -= b[element] * coefficient

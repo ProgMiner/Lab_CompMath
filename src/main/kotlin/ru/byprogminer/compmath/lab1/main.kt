@@ -197,10 +197,10 @@ private fun calculate(system: LinearSystem) {
 
     println("Roots:")
     val roots = system.calculateRoots()
-    println(roots.mapIndexed { i, x -> "x_$i = $x" }.joinToString("\n"))
+    println(roots.mapIndexed { i, x -> "x_${i + 1} = $x" }.joinToString("\n"))
     println()
 
     println("Residuals:")
     val residuals = system.calculateResiduals(roots)
-    println(residuals.mapIndexed { i, r -> "r_$i = $r" }.joinToString("\n"))
+    println(residuals.mapIndexed { i, r -> "r_${i + 1} = $r" }.joinToString("\n"))
 }

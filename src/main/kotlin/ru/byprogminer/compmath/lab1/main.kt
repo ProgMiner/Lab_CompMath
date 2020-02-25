@@ -203,5 +203,4 @@ private fun calculate(system: LinearSystem) {
     println("Residuals:")
     val residuals = system.calculateResiduals(roots)
     println(residuals.mapIndexed { i, r -> "r_$i = $r" }.joinToString("\n"))
-    println()
 }

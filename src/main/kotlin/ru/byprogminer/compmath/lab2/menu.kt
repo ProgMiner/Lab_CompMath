@@ -1,4 +1,4 @@
-package ru.byprogminer.compmath.lab1
+package ru.byprogminer.compmath.lab2
 
 import java.io.BufferedReader
 import java.io.PrintStream

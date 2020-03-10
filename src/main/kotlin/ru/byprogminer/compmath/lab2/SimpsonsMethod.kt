@@ -39,21 +39,20 @@ class SimpsonsMethod(val func: (Double) -> Double) {
         cuts = 2
         var result = doCalculate(realStart, length)
         var prevResult: Double
-        cuts = 4
 
         do {
             prevResult = result
+
+            cuts *= 2
             result = doCalculate(realStart, length)
 
             if (!result.isFinite()) {
                 throw ArithmeticException("integral doesn't convergence")
             }
 
-            cuts *= 2
             error = abs(result - prevResult) / 15
         } while (error > precision)
 
-        cuts /= 2
         return if (end < start) {
             -result
         } else {

@@ -4,6 +4,11 @@ import kotlin.math.abs
 
 class SimpsonsMethod(val func: (Double) -> Double) {
 
+    companion object {
+
+        private const val EPSILON = 1e-5
+    }
+
     var cuts = 0
         private set
 
@@ -26,28 +31,29 @@ class SimpsonsMethod(val func: (Double) -> Double) {
         }
 
         values = arrayOf(
-                func(realStart),
-                func(realStart + length / 2),
-                func(realStart + length)
+                getFuncRightValue(realStart),
+                getFuncValue(realStart + length / 2),
+                getFuncLeftValue(realStart + length)
         )
 
-        var result = doCalculate(realStart, length, 2)
+        cuts = 2
+        var result = doCalculate(realStart, length)
         var prevResult: Double
         cuts = 4
 
         do {
             prevResult = result
-            result = doCalculate(realStart, length, cuts)
+            result = doCalculate(realStart, length)
 
             if (!result.isFinite()) {
                 throw ArithmeticException("integral doesn't convergence")
             }
 
             cuts *= 2
-
             error = abs(result - prevResult) / 15
         } while (error > precision)
 
+        cuts /= 2
         return if (end < start) {
             -result
         } else {
@@ -55,7 +61,7 @@ class SimpsonsMethod(val func: (Double) -> Double) {
         }
     }
 
-    private fun doCalculate(start: Double, length: Double, cuts: Int): Double {
+    private fun doCalculate(start: Double, length: Double): Double {
         val cutLength = length / cuts
 
         if (cuts > 2) {
@@ -75,9 +81,39 @@ class SimpsonsMethod(val func: (Double) -> Double) {
         }
 
         for (i in 1 until values.size - 1 step 2) {
-            values[i] = func(start + cutLength * i)
+            values[i] = getFuncValue(start + cutLength * i)
         }
 
         this.values = values as Array<Double>
+    }
+
+    private fun getFuncLeftValue(x: Double): Double {
+        val ret = func(x)
+
+        if (!ret.isFinite()) {
+            return func(x - EPSILON)
+        }
+
+        return ret
+    }
+
+    private fun getFuncRightValue(x: Double): Double {
+        val ret = func(x)
+
+        if (!ret.isFinite()) {
+            return func(x + EPSILON)
+        }
+
+        return ret
+    }
+
+    private fun getFuncValue(x: Double): Double {
+        val ret = func(x)
+
+        if (!ret.isFinite()) {
+            return (func(x - EPSILON) + func(x + EPSILON)) / 2
+        }
+
+        return ret
     }
 }

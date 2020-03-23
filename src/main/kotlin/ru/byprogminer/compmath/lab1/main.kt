@@ -196,11 +196,12 @@ private fun calculate(system: LinearSystem) {
     }
 
     println("Roots:")
-    val roots = triangle.calculateRoots().map(Fraction::toDouble).toTypedArray()
-    println(roots.mapIndexed { i, x -> "x_${i + 1} = $x" }.joinToString("\n"))
+    val roots = triangle.calculateRoots()
+    val decimalRoots = roots.map(Fraction::toDouble).toTypedArray()
+    println(roots.mapIndexed { i, x -> "x_${i + 1} = $x = ${decimalRoots[i]}" }.joinToString("\n"))
     println()
 
     println("Residuals:")
-    val residuals = system.calculateResiduals(roots)
+    val residuals = system.calculateResiduals(decimalRoots)
     println(residuals.mapIndexed { i, r -> "r_${i + 1} = $r" }.joinToString("\n"))
 }

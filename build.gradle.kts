@@ -1,8 +1,11 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.3.61"
+    kotlin("jvm") version "1.3.71"
     id("com.github.johnrengelman.shadow") version "5.2.0"
+
+    java
+    idea
 }
 
 group = "ru.byprogminer"
@@ -10,7 +13,7 @@ version = "1.0-SNAPSHOT"
 
 tasks.jar {
     manifest {
-        attributes["Main-Class"] = "ru.byprogminer.compmath.lab2.MainKt"
+        attributes["Main-Class"] = "ru.byprogminer.compmath.lab3.MainKt"
     }
 }
 
@@ -30,4 +33,11 @@ compileKotlin.kotlinOptions {
 val compileTestKotlin: KotlinCompile by tasks
 compileTestKotlin.kotlinOptions {
     jvmTarget = "1.8"
+}
+
+idea {
+    module {
+        isDownloadJavadoc = true
+        isDownloadSources = true
+    }
 }

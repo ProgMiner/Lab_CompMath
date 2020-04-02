@@ -1,1 +1,1 @@
-rootProject.name = "Lab2_CompMath"
+rootProject.name = "Lab3_CompMath"

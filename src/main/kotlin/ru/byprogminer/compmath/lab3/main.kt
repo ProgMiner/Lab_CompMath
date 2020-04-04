@@ -1,13 +1,15 @@
 package ru.byprogminer.compmath.lab3
 
+import ru.byprogminer.compmath.lab3.equation.InvalidEquation
 import ru.byprogminer.compmath.lab3.gui.MainWindow
 import ru.byprogminer.compmath.lab3.gui.util.randomColor
+import ru.byprogminer.compmath.lab3.method.BisectionMethod
+import ru.byprogminer.compmath.lab3.method.NewtonsMethod
 import ru.byprogminer.compmath.lab3.util.EventManager
 import ru.byprogminer.compmath.lab3.util.reactiveHolder
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import javax.swing.SwingUtilities
-
 
 const val APP_NAME = "Nonlinear equation solver"
 const val APP_VERSION = "1.0-SNAPSHOT"
@@ -17,7 +19,7 @@ fun main() {
             Store.Mode.EQUATION,
             0.001,
             10000,
-            null,
+            InvalidEquation(""),
             randomColor(),
             BisectionMethod,
             emptyList(),

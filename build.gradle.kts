@@ -4,6 +4,7 @@ plugins {
     kotlin("jvm") version "1.3.71"
     id("com.github.johnrengelman.shadow") version "5.2.0"
 
+    antlr
     java
     idea
 }
@@ -19,6 +20,7 @@ tasks.jar {
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
+    antlr("org.antlr:antlr4:4.7.1")
 }
 
 repositories {
@@ -30,6 +32,8 @@ compileKotlin.kotlinOptions {
     jvmTarget = "1.8"
 }
 
+compileKotlin.dependsOn(tasks.generateGrammarSource)
+
 val compileTestKotlin: KotlinCompile by tasks
 compileTestKotlin.kotlinOptions {
     jvmTarget = "1.8"
@@ -40,4 +44,9 @@ idea {
         isDownloadJavadoc = true
         isDownloadSources = true
     }
+}
+
+tasks.generateGrammarSource {
+    maxHeapSize = "64m"
+    arguments = arguments + listOf("-long-messages")
 }

@@ -1,10 +1,16 @@
 package ru.byprogminer.compmath.lab3.gui
 
-import ru.byprogminer.compmath.lab3.*
+import ru.byprogminer.compmath.lab3.APP_NAME
+import ru.byprogminer.compmath.lab3.APP_VERSION
+import ru.byprogminer.compmath.lab3.Store
+import ru.byprogminer.compmath.lab3.equation.InvalidEquation
 import ru.byprogminer.compmath.lab3.gui.util.*
+import ru.byprogminer.compmath.lab3.method.BisectionMethod
+import ru.byprogminer.compmath.lab3.method.NewtonsMethod
+import ru.byprogminer.compmath.lab3.method.SimpleIterationsMethod
+import ru.byprogminer.compmath.lab3.parser.parse
 import ru.byprogminer.compmath.lab3.util.ReactiveHolder
 import ru.byprogminer.compmath.lab3.util.reactiveHolder
-import sun.swing.SwingUtilities2
 import java.awt.*
 import javax.swing.*
 
@@ -54,6 +60,8 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
 
     private val plotPanel = JPanel() // TODO
 
+    private val defaultTextAreaBackgroundColor = modeEquationEquationArea.background
+
     private val selectedSystemEquation = reactiveHolder<Int?>(null)
 
     init {
@@ -88,7 +96,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         modeEquationPanel.add(modeEquationColorButton, GridBagConstraints(1, 0, 1, 1, .0, .0, GridBagConstraints.BASELINE, GridBagConstraints.NONE, Insets(0, 0, 5, 0), 0, 0))
 
         modeEquationEquationArea.document.addDocumentListener(documentAdapter {
-            store.mutate { store -> store.copy(equation = TODO("parsing")) }
+            store.mutate { store -> store.copy(equation = parse(modeEquationEquationArea.text)) }
         })
         modeEquationPanel.add(modeEquationEquationPane, GridBagConstraints(0, 1, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 5, 0), 0, 0))
 
@@ -107,7 +115,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
 
         modeSystemAddEquationButton.preferredSize = Dimension(20, 20)
         modeSystemAddEquationButton.addActionListener {
-            store.mutate { store -> store.copy(equations = store.equations + listOf(DefaultEquation("") to randomColor())) }
+            store.mutate { store -> store.copy(equations = store.equations + listOf(InvalidEquation("") to randomColor())) }
         }
         modeSystemPanel.add(modeSystemAddEquationButton, GridBagConstraints(1, 0, 1, 1, .0, .0, GridBagConstraints.BASELINE, GridBagConstraints.NONE, Insets(0, 0, 5, 5), 0, 0))
 
@@ -192,6 +200,20 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         }
 
         modeEquationColorButton.icon = ColorIconFactory.getIcon(store.equationColor)
+
+        run {
+            if (store.equation.toString().trim() != "") {
+                try {
+                    store.equation.variables
+                } catch (e: Exception) {
+                    modeEquationEquationArea.background = Color.RED
+                    return@run
+                }
+            }
+
+            modeEquationEquationArea.background = defaultTextAreaBackgroundColor
+        }
+
         modeEquationMethodButtons[store.method]?.isSelected = true
         modeSystemMethodButtons[store.systemMethod]?.isSelected = true
 

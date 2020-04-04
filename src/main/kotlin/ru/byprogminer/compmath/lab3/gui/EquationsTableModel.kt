@@ -1,9 +1,8 @@
 package ru.byprogminer.compmath.lab3.gui
 
-import ru.byprogminer.compmath.lab3.DefaultEquation
-import ru.byprogminer.compmath.lab3.Equation
 import ru.byprogminer.compmath.lab3.Store
 import ru.byprogminer.compmath.lab3.gui.util.ColorIconFactory
+import ru.byprogminer.compmath.lab3.parser.parse
 import ru.byprogminer.compmath.lab3.util.ReactiveHolder
 import java.awt.Color
 import javax.swing.ImageIcon
@@ -39,7 +38,7 @@ class EquationsTableModel(private val store: ReactiveHolder<Store>): AbstractTab
 
     override fun isCellEditable(row: Int, column: Int) = true
 
-    override fun getValueAt(row: Int, column: Int) = store.get().equations[row].let { when (column) {
+    override fun getValueAt(row: Int, column: Int): Any = store.get().equations[row].let { when (column) {
         0 -> it.first
         1 -> ColorIconFactory.getIcon(it.second)
 
@@ -51,7 +50,7 @@ class EquationsTableModel(private val store: ReactiveHolder<Store>): AbstractTab
             0 -> if (value is String) {
                 store.mutate { store ->
                     store.copy(equations = store.equations.mapIndexed { i, pair -> when (i) {
-                        row -> pair.copy(first = DefaultEquation(value))
+                        row -> pair.copy(first = parse(value))
                         else -> pair
                     } })
                 }

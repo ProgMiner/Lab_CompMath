@@ -18,23 +18,48 @@ const val APP_NAME = "Nonlinear equation solver"
 const val APP_VERSION = "1.0-SNAPSHOT"
 
 fun main() {
-    val store = reactiveHolder(Store(
+    @Suppress("RemoveExplicitTypeArguments") val store = reactiveHolder(Store(
             Store.Mode.EQUATION,
+
             -100.0,
             100.0,
             40,
+
             0.001,
             10000,
+
             InvalidEquation(""),
             randomColor(),
             BisectionMethod,
+
             emptyList(),
             NewtonsMethod,
-            reactiveHolder(emptySet())
+
+            emptySet(),
+
+            100.0,
+            Store.PlotMode.EQUATIONS,
+            mapOf(),
+            null
     ))
 
     store.onChange.listeners.add { oldStore, storeHolder ->
         val st = storeHolder.get()
+
+        run {
+            if (st.mode != oldStore.mode || st.equation != oldStore.equation || st.equations != oldStore.equations) {
+                val vars = st.variables
+
+                storeHolder.mutate { store ->
+                    store.copy(
+                            plotOffset = vars.map { v ->
+                                v to ((st.end ?: st.begin ?: 100.0) - (st.begin ?: st.end ?: -100.0)) / 2
+                            }.toMap() + store.plotOffset,
+                            plotMainVariable = store.plotMainVariable ?: vars.min()
+                    )
+                }
+            }
+        }
 
         if (
                 st.mode != oldStore.mode ||
@@ -43,7 +68,7 @@ fun main() {
                 st.equation != oldStore.equation || st.method != oldStore.method ||
                 st.equations != oldStore.equations || st.systemMethod != oldStore.systemMethod
         ) {
-            val roots = reactiveHolder<Set<Pair<Map<String, Double>, Int>>>(emptySet())
+            val roots = emptySet<Pair<Map<String, Double>, Int>>()
 
             if (st.begin != null && st.end != null && st.cuts != null && st.precision != null && st.iterations != null) {
                 thread {
@@ -62,11 +87,11 @@ fun main() {
                     val precision = Precision(st.precision, st.iterations)
                     val interval = Interval(st.begin, st.end, st.cuts)
 
-                    roots.set(when (st.mode) {
+                    storeHolder.mutate { s -> s.copy(roots = when (st.mode) {
                         Store.Mode.EQUATION -> st.method.solve(st.equation, interval, precision)
                         Store.Mode.EQUATION_SYSTEM ->
                             st.systemMethod.solve(st.equations.map { (eq, _) -> eq }, interval, precision)
-                    })
+                    }) }
                 }
             }
 

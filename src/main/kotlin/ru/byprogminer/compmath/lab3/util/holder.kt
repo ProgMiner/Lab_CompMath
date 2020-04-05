@@ -29,14 +29,20 @@ fun<T> reactiveHolder(value: T): ReactiveHolder<T> = object : SimpleMutableHolde
     override fun set(value: T): T {
         val previous = super.set(value)
 
-        onChange.fire(previous)
+        if (previous != value) {
+            onChange.fire(previous)
+        }
+
         return previous
     }
 
     override fun mutate(map: (T) -> T): T {
         val previous = super.mutate(map)
 
-        onChange.fire(previous)
+        if (previous != value) {
+            onChange.fire(previous)
+        }
+
         return previous
     }
 }

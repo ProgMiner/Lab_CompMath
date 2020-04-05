@@ -71,6 +71,21 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
     private val plotRootsTabbedPane = JTabbedPane()
     private val plotRootsPlotPanel = JPanel(GridBagLayout())
     private val plotRootsPlotPlot = JPanel() // TODO
+    private val plotRootsPlotZoomLabel = JLabel("Zoom:")
+    private val plotRootsPlotZoomSlider = JSlider(1, 10000)
+    private val plotRootsPlotZoomField = JTextField(8)
+    private val plotRootsPlotModePanel = JPanel()
+    private val plotRootsPlotModeLabel = JLabel("Mode:")
+    private val plotRootsPlotModeButtonGroup = ButtonGroup()
+    private val plotRootsPlotModeButtons = mapOf(
+            "Equations" to Store.PlotMode.EQUATIONS,
+            "Functions" to Store.PlotMode.FUNCTIONS
+    ).map { (name, mode) -> mode to JRadioButton(name).also { it.addActionListener {
+        store.mutate { store -> store.copy(plotMode = mode) }
+    } }.also(plotRootsPlotModeButtonGroup::add) }.toMap()
+
+    private val plotRootsPlotOffsetButton = JButton("Offset")
+    private val plotRootsPlotOffsetWindow = OffsetWindow(store)
     private val plotRootsRootsTableModel = RootsTableModel(store)
     private val plotRootsRootsTable = JTable(plotRootsRootsTableModel)
     private val plotRootsRootsTablePlaceholder = JLabel("There isn't roots")
@@ -138,7 +153,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         modeEquationPanel.add(modeEquationEquationPane, GridBagConstraints(0, 1, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 5, 0), 0, 0))
 
         modeEquationMethodButtons.toList().forEachIndexed { i, (_, button) ->
-            modeEquationMethodPanel.add(button, GridBagConstraints(0, i, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, if (i == modeEquationMethodButtons.size - 1) 0 else 5, 5), 0, 0))
+            modeEquationMethodPanel.add(button, GridBagConstraints(0, i, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, if (i == modeEquationMethodButtons.size - 1) 0 else 5, 0), 0, 0))
         }
         modeEquationMethodPanel.border = BorderFactory.createCompoundBorder(
                 BorderFactory.createTitledBorder("Method"),
@@ -198,7 +213,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         modeSystemPanel.add(modeSystemEquationsPane, GridBagConstraints(0, 1, 3, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 5, 0), 0, 0))
 
         modeSystemMethodButtons.toList().forEachIndexed { i, (_, button) ->
-            modeSystemMethodPanel.add(button, GridBagConstraints(0, i, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, if (i == modeEquationMethodButtons.size - 1) 0 else 5, 5), 0, 0))
+            modeSystemMethodPanel.add(button, GridBagConstraints(0, i, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, if (i == modeEquationMethodButtons.size - 1) 0 else 5, 0), 0, 0))
         }
         modeSystemMethodPanel.border = BorderFactory.createCompoundBorder(
                 BorderFactory.createTitledBorder("Method"),
@@ -213,7 +228,42 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         _contentPane.add(modeTabbedPane, GridBagConstraints(0, 1, 1, 1, .0, 1.0, GridBagConstraints.SOUTHWEST, GridBagConstraints.VERTICAL, Insets(0, 0, 0, 5), 0, 0))
 
         plotRootsPlotPlot.border = BorderFactory.createLineBorder(null)
-        plotRootsPlotPanel.add(plotRootsPlotPlot, GridBagConstraints(0, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 5, 0), 0, 0))
+        plotRootsPlotPanel.add(plotRootsPlotPlot, GridBagConstraints(0, 0, 3, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 5, 0), 0, 0))
+        plotRootsPlotPanel.add(plotRootsPlotZoomLabel, GridBagConstraints(0, 1, 1, 1, .0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 5), 0, 0))
+
+        plotRootsPlotZoomSlider.addChangeListener {
+            val zoom = plotRootsPlotZoomSlider.value
+
+            if ((store.get().plotZoom * 100).toInt() != zoom) {
+                store.mutate { store -> store.copy(plotZoom = zoom / 100.0) }
+            }
+        }
+        plotRootsPlotPanel.add(plotRootsPlotZoomSlider, GridBagConstraints(1, 1, 1, 1, 1.0, .0, GridBagConstraints.SOUTH, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 5), 0, 0))
+
+        plotRootsPlotZoomField.document.addDocumentListener(documentAdapter {
+            plotRootsPlotZoomField.text.toDoubleOrNull().also { zoom ->
+                plotRootsPlotZoomField.background = when (zoom) {
+                    null -> INVALID_VALUE_COLOR
+                    else -> defaultTextFieldBackgroundColor
+                }
+            }?.let { zoom ->
+                store.mutate { store -> store.copy(plotZoom = zoom) }
+            }
+        })
+        plotRootsPlotPanel.add(plotRootsPlotZoomField, GridBagConstraints(2, 1, 1, 1, .0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 0), 0, 0))
+        plotRootsPlotPanel.add(plotRootsPlotModeLabel, GridBagConstraints(0, 2, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 5), 0, 0))
+
+        plotRootsPlotModeButtons.toList().forEachIndexed { i, (_, button) ->
+            plotRootsPlotModePanel.add(button, GridBagConstraints(i, 0, 1, 1, 1.0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, if (i == plotRootsPlotModeButtons.size - 1) 0 else 5), 0, 0))
+        }
+        plotRootsPlotPanel.add(plotRootsPlotModePanel, GridBagConstraints(1, 2, 1, 1, .0, .0, GridBagConstraints.WEST, GridBagConstraints.NONE, Insets(0, 0, 0, 5), 0, 0))
+
+        plotRootsPlotOffsetButton.addActionListener {
+            plotRootsPlotOffsetWindow.isVisible = true
+        }
+        plotRootsPlotPanel.add(plotRootsPlotOffsetButton, GridBagConstraints(2, 2, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.NONE, Insets(0, 0, 0, 0), 0, 0))
+
+        plotRootsPlotOffsetWindow.setLocationRelativeTo(this)
         plotRootsPlotPanel.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
         plotRootsTabbedPane.add(plotRootsPlotPanel, "Plot")
 
@@ -322,7 +372,23 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
             // systemMethod
             modeSystemMethodButtons[store.systemMethod]?.isSelected = true
 
+            // plotZoom
+            plotRootsPlotZoomSlider.value = (store.plotZoom * 100).toInt()
+
+            if (plotRootsPlotZoomField.text.toDoubleOrNull() != store.plotZoom) {
+                plotRootsPlotZoomField.text = store.plotZoom.toString()
+            }
+
+            // plotMode
+            plotRootsPlotModeButtons[store.plotMode]?.isSelected = true
+
             println("Store changed: $store")
         }
+    }
+
+    override fun dispose() {
+        super.dispose()
+
+        plotRootsPlotOffsetWindow.dispose()
     }
 }

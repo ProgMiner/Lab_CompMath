@@ -1,38 +1,20 @@
 package ru.byprogminer.compmath.lab3.gui
 
 import ru.byprogminer.compmath.lab3.Store
-import ru.byprogminer.compmath.lab3.math.variables
-import ru.byprogminer.compmath.lab3.util.EventManager
 import ru.byprogminer.compmath.lab3.util.ReactiveHolder
 import javax.swing.SwingUtilities
 import javax.swing.table.AbstractTableModel
 
-class RootsTableModel(private val store: ReactiveHolder<Store>): AbstractTableModel() {
+class RootsTableModel(storeHolder: ReactiveHolder<Store>): AbstractTableModel() {
 
-    private var columns = emptyList<String>()
+    private var columns = listOf("Iterations")
     private var rows = emptyList<List<Number>>()
 
-    private var previousRootsHandler: (
-            Set<Pair<Map<String, Double>, Int>>,
-            ReactiveHolder<Set<Pair<Map<String, Double>, Int>>>,
-            EventManager<Set<Pair<Map<String, Double>, Int>>, ReactiveHolder<Set<Pair<Map<String, Double>, Int>>>>
-    ) -> Unit
-
     init {
-        previousRootsHandler = store.get().roots.onChange.listeners.addWithoutValue(this::onRootsChange)
-
-        store.onChange.listeners.add { oldStore, storeHolder ->
+        storeHolder.onChange.listeners.add { oldStore ->
             val store = storeHolder.get()
 
-            val variables = when (store.mode) {
-                Store.Mode.EQUATION -> try {
-                    store.equation.variables
-                } catch (e: UnsupportedOperationException) {
-                    emptySet<String>()
-                }
-
-                Store.Mode.EQUATION_SYSTEM -> store.equations.map { (eq, _) -> eq }.variables
-            }.sorted().toList()
+            val variables = store.variables.sorted().toList()
 
             if (columns != variables) {
                 columns = variables + listOf("Iterations")
@@ -43,24 +25,14 @@ class RootsTableModel(private val store: ReactiveHolder<Store>): AbstractTableMo
             }
 
             if (store.roots != oldStore.roots) {
-                oldStore.roots.onChange.listeners.remove(previousRootsHandler)
-                previousRootsHandler = store.roots.onChange.listeners.addWithoutValue(this::onRootsChange)
+                val rows1 = store.roots.map { values -> columns.map { col -> (values.first[col] ?: values.second) as Number } }
+                if (rows1 != this.rows) {
+                    this.rows = rows1
 
-                onRootsChange(store.roots)
-            }
-        }
-    }
-
-    private fun onRootsChange(rootsHolder: ReactiveHolder<Set<Pair<Map<String, Double>, Int>>>) {
-        val roots = rootsHolder.get()
-
-        val rows = roots.map { values -> columns.map { col -> (values.first[col] ?: values.second) as Number } }
-
-        if (rows != this.rows) {
-            this.rows = rows
-
-            SwingUtilities.invokeLater {
-                fireTableDataChanged()
+                    SwingUtilities.invokeLater {
+                        fireTableDataChanged()
+                    }
+                }
             }
         }
     }

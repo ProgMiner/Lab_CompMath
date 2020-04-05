@@ -3,7 +3,7 @@ package ru.byprogminer.compmath.lab3
 import ru.byprogminer.compmath.lab3.equation.Equation
 import ru.byprogminer.compmath.lab3.math.EquationMethod
 import ru.byprogminer.compmath.lab3.math.EquationSystemMethod
-import ru.byprogminer.compmath.lab3.util.ReactiveHolder
+import ru.byprogminer.compmath.lab3.math.variables
 import java.awt.Color
 
 data class Store(
@@ -23,7 +23,12 @@ data class Store(
         val equations: List<Pair<Equation, Color>>,
         val systemMethod: EquationSystemMethod,
 
-        val roots: ReactiveHolder<Set<Pair<Map<String, Double>, Int>>>
+        val roots: Set<Pair<Map<String, Double>, Int>>,
+
+        val plotZoom: Double,
+        val plotMode: PlotMode,
+        val plotOffset: Map<String, Double>,
+        val plotMainVariable: String?
 ) {
 
     @Suppress("unused")
@@ -31,4 +36,22 @@ data class Store(
 
         EQUATION, EQUATION_SYSTEM
     }
+
+    enum class PlotMode {
+
+        EQUATIONS, FUNCTIONS
+    }
+
+    val variables: Set<String>
+        get() = when (mode) {
+            Mode.EQUATION -> try {
+                equation.variables
+            } catch (e: UnsupportedOperationException) {
+                // Dummy Kotlin
+                @Suppress("RemoveExplicitTypeArguments")
+                emptySet<String>()
+            }
+
+            Mode.EQUATION_SYSTEM -> equations.map { (eq, _) -> eq }.variables
+        }
 }

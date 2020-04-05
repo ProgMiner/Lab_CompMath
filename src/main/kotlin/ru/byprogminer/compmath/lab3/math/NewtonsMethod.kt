@@ -1,10 +1,10 @@
-package ru.byprogminer.compmath.lab3.method
+package ru.byprogminer.compmath.lab3.math
 
 import ru.byprogminer.compmath.lab3.equation.Equation
 
 object NewtonsMethod: EquationSystemMethod {
 
-    override fun solve(equations: List<Equation>): Map<String, Double> {
+    override fun solve(equations: List<Equation>, interval: Interval, precision: Precision): Set<Map<String, Double>> {
         TODO("Not yet implemented")
     }
 

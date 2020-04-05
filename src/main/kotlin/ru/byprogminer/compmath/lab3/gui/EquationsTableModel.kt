@@ -6,6 +6,7 @@ import ru.byprogminer.compmath.lab3.parser.parse
 import ru.byprogminer.compmath.lab3.util.ReactiveHolder
 import java.awt.Color
 import javax.swing.ImageIcon
+import javax.swing.SwingUtilities
 import javax.swing.table.AbstractTableModel
 
 class EquationsTableModel(private val store: ReactiveHolder<Store>): AbstractTableModel() {
@@ -13,7 +14,9 @@ class EquationsTableModel(private val store: ReactiveHolder<Store>): AbstractTab
     init {
         store.onChange.listeners.add { old, holder ->
             if (holder.get().equations != old.equations) {
-                fireTableDataChanged()
+                SwingUtilities.invokeLater {
+                    fireTableDataChanged()
+                }
             }
         }
     }

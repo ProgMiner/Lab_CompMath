@@ -14,11 +14,11 @@ class EventManager<V, T>(private val target: T, private val executorService: Exe
 
     val listeners by lazy { object : Listeners<V, T> {
 
-        override fun add(listener: (value: V, target: T, EventManager<V, T>) -> Unit) {
+        override fun add(listener: (V, T, EventManager<V, T>) -> Unit) {
             listenersSet.add(listener)
         }
 
-        override fun remove(listener: (value: V, target: T, EventManager<V, T>) -> Unit) {
+        override fun remove(listener: (V, T, EventManager<V, T>) -> Unit) {
             listenersSet.remove(listener)
         }
 
@@ -31,20 +31,20 @@ class EventManager<V, T>(private val target: T, private val executorService: Exe
 
     interface Listeners<V, T> {
 
-        fun add(listener: (value: V, target: T, EventManager<V, T>) -> Unit)
-        fun remove(listener: (value: V, target: T, EventManager<V, T>) -> Unit)
+        fun add(listener: (V, T, EventManager<V, T>) -> Unit)
+        fun remove(listener: (V, T, EventManager<V, T>) -> Unit)
         fun clear()
 
-        fun add(listener: (value: V, target: T) -> Unit): (value: V, target: T, EventManager<V, T>) -> Unit =
+        fun add(listener: (V, T) -> Unit): (V, T, EventManager<V, T>) -> Unit =
             { value: V, target: T, _: EventManager<V, T> -> listener(value, target) }.also { add(it) }
 
-        fun addWithoutValue(listener: (target: T) -> Unit): (value: V, target: T, EventManager<V, T>) -> Unit =
+        fun addWithoutValue(listener: (T) -> Unit): (V, T, EventManager<V, T>) -> Unit =
             { _: V, target: T, _: EventManager<V, T> -> listener(target) }.also { add(it) }
 
-        fun add(listener: (value: V) -> Unit): (value: V, target: T, EventManager<V, T>) -> Unit =
+        fun add(listener: (V) -> Unit): (V, T, EventManager<V, T>) -> Unit =
             { value: V, _: T, _: EventManager<V, T> -> listener(value) }.also { add(it) }
 
-        fun add(listener: () -> Unit): (value: V, target: T, EventManager<V, T>) -> Unit =
+        fun add(listener: () -> Unit): (V, T, EventManager<V, T>) -> Unit =
             { _: V, _: T, _: EventManager<V, T> -> listener() }.also { add(it) }
     }
 }

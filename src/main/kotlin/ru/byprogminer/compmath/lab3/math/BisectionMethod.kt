@@ -37,7 +37,7 @@ object BisectionMethod: EquationMethod {
         }
 
         val aSign = sign(equation.calculateAsFunction(mapOf(variable to begin)))
-        return if (aSign == sign(xValue)) {
+        return if (aSign * sign(xValue) > 0) {
             bisect(equation, precision, variable, middle, end, i + 1)
         } else {
             bisect(equation, precision, variable, begin, middle, i + 1)

@@ -25,7 +25,12 @@ class RootsTableModel(private val store: ReactiveHolder<Store>): AbstractTableMo
             val store = storeHolder.get()
 
             val variables = when (store.mode) {
-                Store.Mode.EQUATION -> store.equation.variables
+                Store.Mode.EQUATION -> try {
+                    store.equation.variables
+                } catch (e: UnsupportedOperationException) {
+                    emptySet<String>()
+                }
+
                 Store.Mode.EQUATION_SYSTEM -> store.equations.map { (eq, _) -> eq }.variables
             }.sorted().toList()
 
@@ -40,6 +45,8 @@ class RootsTableModel(private val store: ReactiveHolder<Store>): AbstractTableMo
             if (store.roots != oldStore.roots) {
                 oldStore.roots.onChange.listeners.remove(previousRootsHandler)
                 previousRootsHandler = store.roots.onChange.listeners.addWithoutValue(this::onRootsChange)
+
+                onRootsChange(store.roots)
             }
         }
     }
@@ -58,18 +65,13 @@ class RootsTableModel(private val store: ReactiveHolder<Store>): AbstractTableMo
         }
     }
 
-    override fun getRowCount() = store.get().roots.get().size
+    override fun getRowCount() = rows.size
 
     override fun getColumnCount() = columns.size
-
     override fun getColumnName(columnIndex: Int) = columns[columnIndex]
-
     override fun getColumnClass(columnIndex: Int) = Number::class.java
 
-    override fun getValueAt(rowIndex: Int, columnIndex: Int) = rows[rowIndex][columnIndex]
-
-    override fun setValueAt(aValue: Any?, rowIndex: Int, columnIndex: Int) =
-        throw UnsupportedOperationException()
-
+    override fun getValueAt(rowIndex: Int, columnIndex: Int) = rows.getOrNull(rowIndex)?.getOrNull(columnIndex)
+    override fun setValueAt(aValue: Any?, rowIndex: Int, columnIndex: Int) {}
     override fun isCellEditable(rowIndex: Int, columnIndex: Int) = false
 }

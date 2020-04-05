@@ -68,9 +68,9 @@ fun main() {
                             st.systemMethod.solve(st.equations.map { (eq, _) -> eq }, interval, precision)
                     })
                 }
-
-                storeHolder.mutate { s -> s.copy(roots = roots) }
             }
+
+            storeHolder.mutate { s -> s.copy(roots = roots) }
         }
     }
 

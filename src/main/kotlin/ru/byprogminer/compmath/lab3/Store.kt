@@ -23,7 +23,7 @@ data class Store(
         val equations: List<Pair<Equation, Color>>,
         val systemMethod: EquationSystemMethod,
 
-        val roots: ReactiveHolder<Set<Map<String, Double>>>
+        val roots: ReactiveHolder<Set<Pair<Map<String, Double>, Int>>>
 ) {
 
     @Suppress("unused")

@@ -34,24 +34,42 @@ fun main() {
     ))
 
     store.onChange.listeners.add { oldStore, storeHolder ->
-        if (storeHolder.get().roots == oldStore.roots) {
-            storeHolder.mutate { st ->
-                val roots = reactiveHolder<Set<Map<String, Double>>>(emptySet())
+        val st = storeHolder.get()
 
+        if (
+                st.mode != oldStore.mode ||
+                st.begin != oldStore.begin || st.end != oldStore.end || st.cuts != oldStore.cuts ||
+                st.precision != oldStore.precision || st.iterations != oldStore.iterations ||
+                st.equation != oldStore.equation || st.method != oldStore.method ||
+                st.equations != oldStore.equations || st.systemMethod != oldStore.systemMethod
+        ) {
+            val roots = reactiveHolder<Set<Pair<Map<String, Double>, Int>>>(emptySet())
+
+            if (st.begin != null && st.end != null && st.cuts != null && st.precision != null && st.iterations != null) {
                 thread {
-                    if (st.begin != null && st.end != null && st.cuts != null && st.precision != null && st.iterations != null) {
-                        val precision = Precision(st.precision, st.iterations)
-                        val interval = Interval(st.begin, st.end, st.cuts)
+                    when (st.mode) {
+                        Store.Mode.EQUATION -> try {
+                            st.equation.variables
+                        } catch (e: UnsupportedOperationException) {
+                            return@thread
+                        }
 
-                        roots.set(when (st.mode) {
-                            Store.Mode.EQUATION -> st.method.solve(st.equation, interval, precision)
-                            Store.Mode.EQUATION_SYSTEM ->
-                                st.systemMethod.solve(st.equations.map { (eq, _) -> eq }, interval, precision)
-                        })
+                        Store.Mode.EQUATION_SYSTEM -> if (st.equations.isEmpty()) {
+                            return@thread
+                        }
                     }
+
+                    val precision = Precision(st.precision, st.iterations)
+                    val interval = Interval(st.begin, st.end, st.cuts)
+
+                    roots.set(when (st.mode) {
+                        Store.Mode.EQUATION -> st.method.solve(st.equation, interval, precision)
+                        Store.Mode.EQUATION_SYSTEM ->
+                            st.systemMethod.solve(st.equations.map { (eq, _) -> eq }, interval, precision)
+                    })
                 }
 
-                st.copy(roots = roots)
+                storeHolder.mutate { s -> s.copy(roots = roots) }
             }
         }
     }

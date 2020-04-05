@@ -4,5 +4,5 @@ import ru.byprogminer.compmath.lab3.equation.Equation
 
 interface EquationSystemMethod {
 
-    fun solve(equations: List<Equation>, interval: Interval, precision: Precision): Set<Map<String, Double>>
+    fun solve(equations: List<Equation>, interval: Interval, precision: Precision): Set<Pair<Map<String, Double>, Int>>
 }

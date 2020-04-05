@@ -4,7 +4,7 @@ import ru.byprogminer.compmath.lab3.equation.Equation
 
 object SimpleIterationsMethod: EquationMethod {
 
-    override fun solve(equation: Equation, interval: Interval, precision: Precision): Set<Map<String, Double>> {
+    override fun solve(equation: Equation, interval: Interval, precision: Precision): Set<Pair<Map<String, Double>, Int>> {
         TODO("Not yet implemented")
     }
 

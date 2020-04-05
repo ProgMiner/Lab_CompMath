@@ -10,9 +10,13 @@ import javax.swing.table.AbstractTableModel
 class RootsTableModel(private val store: ReactiveHolder<Store>): AbstractTableModel() {
 
     private var columns = emptyList<String>()
-    private var rows = emptyList<List<Double>>()
+    private var rows = emptyList<List<Number>>()
 
-    private var previousRootsHandler: (Set<Map<String, Double>>, ReactiveHolder<Set<Map<String, Double>>>, EventManager<Set<Map<String, Double>>, ReactiveHolder<Set<Map<String, Double>>>>) -> Unit
+    private var previousRootsHandler: (
+            Set<Pair<Map<String, Double>, Int>>,
+            ReactiveHolder<Set<Pair<Map<String, Double>, Int>>>,
+            EventManager<Set<Pair<Map<String, Double>, Int>>, ReactiveHolder<Set<Pair<Map<String, Double>, Int>>>>
+    ) -> Unit
 
     init {
         previousRootsHandler = store.get().roots.onChange.listeners.addWithoutValue(this::onRootsChange)
@@ -26,7 +30,7 @@ class RootsTableModel(private val store: ReactiveHolder<Store>): AbstractTableMo
             }.sorted().toList()
 
             if (columns != variables) {
-                columns = variables
+                columns = variables + listOf("Iterations")
 
                 SwingUtilities.invokeLater {
                     fireTableStructureChanged()
@@ -40,10 +44,10 @@ class RootsTableModel(private val store: ReactiveHolder<Store>): AbstractTableMo
         }
     }
 
-    private fun onRootsChange(rootsHolder: ReactiveHolder<Set<Map<String, Double>>>) {
+    private fun onRootsChange(rootsHolder: ReactiveHolder<Set<Pair<Map<String, Double>, Int>>>) {
         val roots = rootsHolder.get()
 
-        val rows = roots.map { values -> columns.map { col -> values[col] ?: throw IllegalArgumentException() } }
+        val rows = roots.map { values -> columns.map { col -> (values.first[col] ?: values.second) as Number } }
 
         if (rows != this.rows) {
             this.rows = rows
@@ -60,7 +64,7 @@ class RootsTableModel(private val store: ReactiveHolder<Store>): AbstractTableMo
 
     override fun getColumnName(columnIndex: Int) = columns[columnIndex]
 
-    override fun getColumnClass(columnIndex: Int) = Double::class.java
+    override fun getColumnClass(columnIndex: Int) = Number::class.java
 
     override fun getValueAt(rowIndex: Int, columnIndex: Int) = rows[rowIndex][columnIndex]
 

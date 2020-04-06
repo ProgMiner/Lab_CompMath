@@ -63,10 +63,10 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null) {
         // Grid
         val realGridStep = ceil(abs(min(intervalX, intervalY) / 20.0)).toInt()
 
-        if (intervalX != .0) {
+        if (realGridStep != 0) {
             val gridStepX = realGridStep * zoomX * signX
-
             var currentGridLineX = centerX - (centerX / gridStepX).toInt() * gridStepX
+            var currentRealGridLineX = (store.plotAbscissaBegin + currentGridLineX / zoomX).toInt()
             while (currentGridLineX < width) {
 
                 graphics.color = GRID_COLOR
@@ -75,16 +75,17 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null) {
                 graphics.color = AXES_COLOR
                 graphics.drawLine(currentGridLineX.toInt(), (centerY - 3).toInt(), currentGridLineX.toInt(), (centerY + 3).toInt())
 
+                if (currentRealGridLineX != 0) {
+                    graphics.drawString(currentRealGridLineX.toString(), currentGridLineX.toInt(), (centerY - 5).toInt())
+                }
+
                 currentGridLineX += gridStepX
+                currentRealGridLineX += realGridStep * signX
             }
 
-            // TODO text
-        }
-
-        if (intervalY != .0) {
             val gridStepY = realGridStep * zoomY * signY
-
             var currentGridLineY = centerY - (centerY / gridStepY).toInt() * gridStepY
+            var currentRealGridLineY = (store.plotOrdinateEnd + currentGridLineY / zoomY).toInt()
             while (currentGridLineY < width) {
 
                 graphics.color = GRID_COLOR
@@ -93,7 +94,12 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null) {
                 graphics.color = AXES_COLOR
                 graphics.drawLine((centerX - 3).toInt(), currentGridLineY.toInt(), (centerX + 3).toInt(), currentGridLineY.toInt())
 
+                if (currentRealGridLineY != 0) {
+                    graphics.drawString(currentRealGridLineY.toString(), (centerX + 3).toInt(), (currentGridLineY - 2).toInt())
+                }
+
                 currentGridLineY += gridStepY
+                currentRealGridLineY += realGridStep * signY
             }
 
             // TODO text
@@ -140,6 +146,10 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null) {
             } catch (e: UnsupportedOperationException) {
                 return@filter false
             } }
+
+            if (store.mode == Store.Mode.EQUATION && graphics is Graphics2D) {
+                graphics.stroke = BasicStroke(2f)
+            }
 
             val futures = mutableListOf<CompletableFuture<Void>>()
             for ((equation, color) in equations) {
@@ -201,9 +211,11 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null) {
             }
 
             CompletableFuture.allOf(*futures.toTypedArray()).join()
-        }
 
-        // TODO roots
+            if (store.mode == Store.Mode.EQUATION && graphics is Graphics2D) {
+                graphics.stroke = BasicStroke(1f)
+            }
+        }
 
         buffer = newBuffer
     }

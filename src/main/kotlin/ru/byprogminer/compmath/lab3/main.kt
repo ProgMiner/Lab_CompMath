@@ -78,7 +78,9 @@ fun main() {
                 thread {
                     when (st.mode) {
                         Store.Mode.EQUATION -> try {
-                            st.equation.variables
+                            if (st.equation.variables.size > 1) {
+                                return@thread
+                            }
                         } catch (e: UnsupportedOperationException) {
                             return@thread
                         }

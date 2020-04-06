@@ -17,13 +17,14 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null) {
 
         val BACKGROUND_COLOR: Color = Color.WHITE
         val GRID_COLOR: Color = Color.LIGHT_GRAY
+        val INTERVAL_COLOR: Color = Color.GRAY
         val AXES_COLOR: Color = Color.BLACK
         val ABSCISSA_COLOR: Color = Color.RED
         val ORDINATE_COLOR: Color = Color.GREEN
         val APPLICATE_COLOR: Color = Color.BLUE
     }
 
-    var buffer: BufferedImage? = null
+    private var buffer: BufferedImage? = null
 
     init {
         // Dummy Kotlin
@@ -101,8 +102,18 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null) {
                 currentGridLineY += gridStepY
                 currentRealGridLineY += realGridStep * signY
             }
+        }
 
-            // TODO text
+        // Interval
+        if (store.begin != null && store.end != null && store.cuts != null) {
+            graphics.color = INTERVAL_COLOR
+
+            val step = (store.end - store.begin) * zoomX / store.cuts
+            var x = centerX + store.begin * zoomX
+            for (i in 0..store.cuts) {
+                graphics.drawLine(x.toInt(), 0, x.toInt(), height)
+                x += step
+            }
         }
 
         // Axes

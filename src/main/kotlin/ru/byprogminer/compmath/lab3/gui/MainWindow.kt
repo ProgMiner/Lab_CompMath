@@ -101,7 +101,9 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
     private val plotRootsPlotButtonsSliceWindow = SliceWindow(store)
     private val plotRootsRootsTableModel = RootsTableModel(store)
     private val plotRootsRootsTable = JTable(plotRootsRootsTableModel)
-    private val plotRootsRootsTablePlaceholder = JLabel("There isn't roots")
+    private val plotRootsRootsTableNoRootsPlaceholder = JLabel("There isn't roots")
+    private val plotRootsRootsTableEquationsOfSeveralVariablesPlaceholder = JLabel("Equations of several variables is not supported")
+    private val plotRootsRootsTableProgressBar = JProgressBar()
     private val plotRootsRootsPane = JScrollPane(plotRootsRootsTable)
 
     private val defaultTextFieldBackgroundColor = precisionIntervalPrecisionPrecisionField.background
@@ -378,12 +380,27 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         plotRootsTabbedPane.add(plotRootsPlotPanel, "Plot")
 
         plotRootsRootsTableModel.addTableModelListener {
-            plotRootsRootsTablePlaceholder.isVisible = plotRootsRootsTableModel.rowCount == 0
+            val store = store.get()
+
+            val manyVarsEquation = store.mode == Store.Mode.EQUATION && store.variables.size > 1
+            val validEquation = store.variables.isNotEmpty()
+            val noRoots = store.roots.isEmpty()
+
+            plotRootsRootsTableNoRootsPlaceholder.isVisible = !manyVarsEquation && !validEquation
+            plotRootsRootsTableEquationsOfSeveralVariablesPlaceholder.isVisible = manyVarsEquation
+            plotRootsRootsTableProgressBar.isVisible = !manyVarsEquation && validEquation && noRoots
             plotRootsRootsTable.repaint()
         }
         plotRootsRootsTable.layout = GridBagLayout()
         plotRootsRootsTable.fillsViewportHeight = true
-        plotRootsRootsTable.add(plotRootsRootsTablePlaceholder)
+        plotRootsRootsTable.add(plotRootsRootsTableNoRootsPlaceholder, GridBagConstraints(0, 0, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.NONE, Insets(0, 0, 0, 0), 0, 0))
+
+        plotRootsRootsTableEquationsOfSeveralVariablesPlaceholder.isVisible = false
+        plotRootsRootsTable.add(plotRootsRootsTableEquationsOfSeveralVariablesPlaceholder, GridBagConstraints(0, 0, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.NONE, Insets(0, 0, 0, 0), 0, 0))
+
+        plotRootsRootsTableProgressBar.isVisible = false
+        plotRootsRootsTableProgressBar.isIndeterminate = true
+        plotRootsRootsTable.add(plotRootsRootsTableProgressBar, GridBagConstraints(0, 0, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.NONE, Insets(0, 0, 0, 0), 0, 0))
         plotRootsTabbedPane.add(plotRootsRootsPane, "Roots")
         _contentPane.add(plotRootsTabbedPane, GridBagConstraints(1, 0, 0, 2, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 0, 0), 0, 0))
         _contentPane.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)

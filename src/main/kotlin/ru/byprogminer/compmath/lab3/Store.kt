@@ -25,22 +25,14 @@ data class Store(
 
         val roots: Set<Pair<Map<String, Double>, Int>>,
 
-        val plotZoom: Double,
+        val plotAbscissaVariable: String?,
+        val plotAbscissaBegin: Double,
+        val plotAbscissaEnd: Double,
+        val plotOrdinateBegin: Double,
+        val plotOrdinateEnd: Double,
         val plotMode: PlotMode,
-        val plotOffset: Map<String, Double>,
-        val plotMainVariable: String?
+        val plotSlice: Map<String, Double>
 ) {
-
-    @Suppress("unused")
-    enum class Mode {
-
-        EQUATION, EQUATION_SYSTEM
-    }
-
-    enum class PlotMode {
-
-        EQUATIONS, FUNCTIONS
-    }
 
     val variables: Set<String>
         get() = when (mode) {
@@ -54,4 +46,15 @@ data class Store(
 
             Mode.EQUATION_SYSTEM -> equations.map { (eq, _) -> eq }.variables
         }
+
+    @Suppress("unused")
+    enum class Mode {
+
+        EQUATION, EQUATION_SYSTEM
+    }
+
+    enum class PlotMode {
+
+        EQUATIONS, FUNCTIONS
+    }
 }

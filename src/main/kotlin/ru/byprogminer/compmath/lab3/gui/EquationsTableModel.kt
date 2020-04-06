@@ -1,6 +1,7 @@
 package ru.byprogminer.compmath.lab3.gui
 
 import ru.byprogminer.compmath.lab3.Store
+import ru.byprogminer.compmath.lab3.equation.Equation
 import ru.byprogminer.compmath.lab3.gui.util.ColorIconFactory
 import ru.byprogminer.compmath.lab3.parser.parse
 import ru.byprogminer.compmath.lab3.util.ReactiveHolder
@@ -11,17 +12,23 @@ import javax.swing.table.AbstractTableModel
 
 class EquationsTableModel(private val store: ReactiveHolder<Store>): AbstractTableModel() {
 
+    private var rows = listOf<Pair<Equation, Color>>()
+
     init {
         store.onChange.listeners.add { old, holder ->
-            if (holder.get().equations != old.equations) {
+            val equations = holder.get().equations
+
+            if (equations != old.equations) {
                 SwingUtilities.invokeLater {
+                    rows = equations
+
                     fireTableDataChanged()
                 }
             }
         }
     }
 
-    override fun getRowCount() = store.get().equations.size
+    override fun getRowCount() = rows.size
 
     override fun getColumnCount() = 2
 
@@ -41,7 +48,7 @@ class EquationsTableModel(private val store: ReactiveHolder<Store>): AbstractTab
 
     override fun isCellEditable(row: Int, column: Int) = true
 
-    override fun getValueAt(row: Int, column: Int): Any = store.get().equations[row].let { when (column) {
+    override fun getValueAt(row: Int, column: Int): Any = rows[row].let { when (column) {
         0 -> it.first
         1 -> ColorIconFactory.getIcon(it.second)
 
@@ -51,7 +58,7 @@ class EquationsTableModel(private val store: ReactiveHolder<Store>): AbstractTab
     override fun setValueAt(value: Any?, row: Int, column: Int) {
         when (column) {
             0 -> if (value is String) {
-                store.mutate { store ->
+                store.mutateIfOther { store ->
                     store.copy(equations = store.equations.mapIndexed { i, pair -> when (i) {
                         row -> pair.copy(first = parse(value))
                         else -> pair
@@ -60,7 +67,7 @@ class EquationsTableModel(private val store: ReactiveHolder<Store>): AbstractTab
             }
 
             1 -> if (value is Color) {
-                store.mutate { store ->
+                store.mutateIfOther { store ->
                     store.copy(equations = store.equations.mapIndexed { i, pair -> when (i) {
                         row -> pair.copy(second = value)
                         else -> pair

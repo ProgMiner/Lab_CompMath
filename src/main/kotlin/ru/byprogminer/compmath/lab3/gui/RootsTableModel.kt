@@ -15,21 +15,22 @@ class RootsTableModel(storeHolder: ReactiveHolder<Store>): AbstractTableModel() 
             val store = storeHolder.get()
 
             val variables = store.variables.sorted().toList()
-
-            if (columns != variables) {
-                columns = variables + listOf("Iterations")
-
+            val columns = variables + listOf("Iterations")
+            if (this.columns != columns) {
                 SwingUtilities.invokeLater {
+                    this.columns = columns
+
                     fireTableStructureChanged()
                 }
             }
 
             if (store.roots != oldStore.roots) {
                 val rows1 = store.roots.map { values -> columns.map { col -> (values.first[col] ?: values.second) as Number } }
-                if (rows1 != this.rows) {
-                    this.rows = rows1
 
+                if (rows1 != this.rows) {
                     SwingUtilities.invokeLater {
+                        this.rows = rows1
+
                         fireTableDataChanged()
                     }
                 }

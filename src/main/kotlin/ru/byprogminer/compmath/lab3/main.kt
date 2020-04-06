@@ -37,10 +37,13 @@ fun main() {
 
             emptySet(),
 
+            null,
+            -100.0,
+            100.0,
+            -100.0,
             100.0,
             Store.PlotMode.EQUATIONS,
-            mapOf(),
-            null
+            mapOf()
     ))
 
     store.onChange.listeners.add { oldStore, storeHolder ->
@@ -50,12 +53,13 @@ fun main() {
             if (st.mode != oldStore.mode || st.equation != oldStore.equation || st.equations != oldStore.equations) {
                 val vars = st.variables
 
-                storeHolder.mutate { store ->
+                storeHolder.mutateIfOther { store ->
                     store.copy(
-                            plotOffset = vars.map { v ->
-                                v to ((st.end ?: st.begin ?: 100.0) - (st.begin ?: st.end ?: -100.0)) / 2
-                            }.toMap() + store.plotOffset,
-                            plotMainVariable = store.plotMainVariable ?: vars.min()
+                            plotSlice = vars.map { v -> v to .0 }.toMap() + store.plotSlice,
+                            plotAbscissaVariable = when (store.plotAbscissaVariable) {
+                                in vars -> store.plotAbscissaVariable
+                                else -> vars.min()
+                            }
                     )
                 }
             }
@@ -87,7 +91,7 @@ fun main() {
                     val precision = Precision(st.precision, st.iterations)
                     val interval = Interval(st.begin, st.end, st.cuts)
 
-                    storeHolder.mutate { s -> s.copy(roots = when (st.mode) {
+                    storeHolder.mutateIfOther { s -> s.copy(roots = when (st.mode) {
                         Store.Mode.EQUATION -> st.method.solve(st.equation, interval, precision)
                         Store.Mode.EQUATION_SYSTEM ->
                             st.systemMethod.solve(st.equations.map { (eq, _) -> eq }, interval, precision)
@@ -95,7 +99,7 @@ fun main() {
                 }
             }
 
-            storeHolder.mutate { s -> s.copy(roots = roots) }
+            storeHolder.mutateIfOther { s -> s.copy(roots = roots) }
         }
     }
 

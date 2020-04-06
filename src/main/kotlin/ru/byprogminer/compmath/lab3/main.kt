@@ -35,7 +35,7 @@ fun main() {
             emptyList(),
             NewtonsMethod,
 
-            emptySet(),
+            null,
 
             null,
             -100.0,
@@ -72,8 +72,6 @@ fun main() {
                 st.equation != oldStore.equation || st.method != oldStore.method ||
                 st.equations != oldStore.equations || st.systemMethod != oldStore.systemMethod
         ) {
-            val roots = emptySet<Pair<Map<String, Double>, Int>>()
-
             if (st.begin != null && st.end != null && st.cuts != null && st.precision != null && st.iterations != null) {
                 thread {
                     when (st.mode) {
@@ -101,7 +99,7 @@ fun main() {
                 }
             }
 
-            storeHolder.mutateIfOther { s -> s.copy(roots = roots) }
+            storeHolder.mutateIfOther { s -> s.copy(roots = null) }
         }
     }
 

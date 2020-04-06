@@ -43,7 +43,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
     private val modeEquationPanel = JPanel(GridBagLayout())
     private val modeEquationEquationLabel = JLabel("Equation:")
     private val modeEquationColorButton = JButton()
-    private val modeEquationEquationArea = JTextArea(3, 20)
+    private val modeEquationEquationArea = JTextArea()
     private val modeEquationEquationPane = JScrollPane(modeEquationEquationArea)
     private val modeEquationMethodPanel = JPanel(GridBagLayout())
     private val modeEquationMethodButtonGroup = ButtonGroup()
@@ -101,7 +101,8 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
     private val plotRootsPlotButtonsSliceWindow = SliceWindow(store)
     private val plotRootsRootsTableModel = RootsTableModel(store)
     private val plotRootsRootsTable = JTable(plotRootsRootsTableModel)
-    private val plotRootsRootsTableNoRootsPlaceholder = JLabel("There isn't roots")
+    private val plotRootsRootsTableNoEquationsPlaceholder = JLabel("Specify equation or equations system left")
+    private val plotRootsRootsTableNoRootsPlaceholder = JLabel("Roots not found")
     private val plotRootsRootsTableEquationsOfSeveralVariablesPlaceholder = JLabel("Equations of several variables is not supported")
     private val plotRootsRootsTableProgressBar = JProgressBar()
     private val plotRootsRootsPane = JScrollPane(plotRootsRootsTable)
@@ -380,19 +381,24 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         plotRootsTabbedPane.add(plotRootsPlotPanel, "Plot")
 
         plotRootsRootsTableModel.addTableModelListener {
-            val store = store.get()
+            val st = store.get()
 
-            val manyVarsEquation = store.mode == Store.Mode.EQUATION && store.variables.size > 1
-            val validEquation = store.variables.isNotEmpty()
-            val noRoots = store.roots.isEmpty()
+            val manyVarsEquation = st.mode == Store.Mode.EQUATION && st.variables.size > 1
+            val validEquation = st.variables.isNotEmpty()
+            val noRoots = st.roots.isNullOrEmpty()
+            val inProgress = st.roots == null
 
-            plotRootsRootsTableNoRootsPlaceholder.isVisible = !manyVarsEquation && !validEquation
+            plotRootsRootsTableNoEquationsPlaceholder.isVisible = !validEquation
+            plotRootsRootsTableNoRootsPlaceholder.isVisible = !inProgress && noRoots
             plotRootsRootsTableEquationsOfSeveralVariablesPlaceholder.isVisible = manyVarsEquation
-            plotRootsRootsTableProgressBar.isVisible = !manyVarsEquation && validEquation && noRoots
+            plotRootsRootsTableProgressBar.isVisible = !manyVarsEquation && validEquation && inProgress
             plotRootsRootsTable.repaint()
         }
         plotRootsRootsTable.layout = GridBagLayout()
         plotRootsRootsTable.fillsViewportHeight = true
+        plotRootsRootsTable.add(plotRootsRootsTableNoEquationsPlaceholder, GridBagConstraints(0, 0, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.NONE, Insets(0, 0, 0, 0), 0, 0))
+
+        plotRootsRootsTableNoRootsPlaceholder.isVisible = false
         plotRootsRootsTable.add(plotRootsRootsTableNoRootsPlaceholder, GridBagConstraints(0, 0, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.NONE, Insets(0, 0, 0, 0), 0, 0))
 
         plotRootsRootsTableEquationsOfSeveralVariablesPlaceholder.isVisible = false
@@ -478,17 +484,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
             modeEquationColorButton.icon = ColorIconFactory.getIcon(store.equationColor)
 
             // equation
-            val equationValid = run {
-                if (store.equation.toString().trim() != "") {
-                    try {
-                        store.equation.variables
-                    } catch (e: Exception) {
-                        return@run false
-                    }
-                }
-
-                return@run true
-            }
+            val equationValid = store.equation.toString().trim() == "" || store.variables.isNotEmpty()
 
             modeEquationEquationArea.background = when {
                 equationValid -> defaultTextAreaBackgroundColor

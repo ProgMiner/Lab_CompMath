@@ -25,7 +25,8 @@ class RootsTableModel(storeHolder: ReactiveHolder<Store>): AbstractTableModel() 
             }
 
             if (store.roots != oldStore.roots) {
-                val rows1 = store.roots.map { values -> columns.map { col -> (values.first[col] ?: values.second) as Number } }
+                val rows1 = (store.roots ?: emptySet())
+                        .map { values -> columns.map { col -> (values.first[col] ?: values.second) as Number } }
 
                 if (rows1 != this.rows) {
                     SwingUtilities.invokeLater {

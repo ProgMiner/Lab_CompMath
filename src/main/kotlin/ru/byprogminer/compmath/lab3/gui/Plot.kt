@@ -3,6 +3,8 @@ package ru.byprogminer.compmath.lab3.gui
 import ru.byprogminer.compmath.lab3.Store
 import ru.byprogminer.compmath.lab3.util.ReactiveHolder
 import java.awt.*
+import java.awt.event.ComponentAdapter
+import java.awt.event.ComponentEvent
 import java.awt.image.BufferedImage
 import java.util.concurrent.CompletableFuture
 import javax.swing.JPanel
@@ -27,6 +29,26 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null) {
     private var buffer: BufferedImage? = null
 
     init {
+        addComponentListener(object: ComponentAdapter() {
+
+            fun componentUpdated() {
+                buffer = null
+                repaint()
+            }
+
+            override fun componentMoved(e: ComponentEvent?) {
+                componentUpdated()
+            }
+
+            override fun componentResized(e: ComponentEvent?) {
+                componentUpdated()
+            }
+
+            override fun componentShown(e: ComponentEvent?) {
+                componentUpdated()
+            }
+        })
+
         // Dummy Kotlin
         @Suppress("RedundantLambdaArrow")
         store.onChange.listeners.add { _ ->

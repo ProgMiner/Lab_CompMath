@@ -112,27 +112,27 @@ class SliceWindow(store: ReactiveHolder<Store>): JFrame("Slice") {
         _contentPane.add(variableComponents.slider, GridBagConstraints(1, i, 1, 1, 5.0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, bottomInset, 5), 0, 0))
         _contentPane.add(variableComponents.field, GridBagConstraints(2, i, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, bottomInset, 0), 0, 0))
         _contentScrollPane.revalidate()
-        _contentPane.repaint()
     }
 
     private fun removeVariableComponents(variableComponents: VariableComponents) {
         _contentPane.remove(variableComponents.label)
         _contentPane.remove(variableComponents.slider)
         _contentPane.remove(variableComponents.field)
-        _contentScrollPane.revalidate()
+
         _contentPane.repaint()
+        _contentScrollPane.revalidate()
     }
 
     private fun addPlaceholder() {
         _contentPane.add(placeholderLabel, GridBagConstraints(0, 0, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.NONE, Insets(0, 0, 0, 0), 0, 0))
         _contentScrollPane.revalidate()
-        _contentPane.repaint()
     }
 
     private fun removePlaceholder() {
         _contentPane.remove(placeholderLabel)
-        _contentScrollPane.revalidate()
+
         _contentPane.repaint()
+        _contentScrollPane.revalidate()
     }
 
     private fun calcOffsetFromSlider(begin: Double, end: Double, offset: Int): Double =

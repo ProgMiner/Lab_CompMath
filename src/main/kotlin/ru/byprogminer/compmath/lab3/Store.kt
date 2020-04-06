@@ -23,7 +23,7 @@ data class Store(
         val equations: List<Pair<Equation, Color>>,
         val systemMethod: EquationSystemMethod,
 
-        val roots: Set<Pair<Map<String, Double>, Int>>,
+        val roots: Set<Pair<Map<String, Double>, Int>>?,
 
         val plotAbscissaVariable: String?,
         val plotAbscissaBegin: Double,

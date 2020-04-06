@@ -13,6 +13,7 @@ import ru.byprogminer.compmath.lab3.util.ReactiveHolder
 import ru.byprogminer.compmath.lab3.util.reactiveHolder
 import java.awt.*
 import javax.swing.*
+import kotlin.math.abs
 
 class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION") {
 
@@ -333,6 +334,37 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         }
         plotRootsPlotPanel.add(plotRootsPlotModePanel, GridBagConstraints(1, 3, 5, 1, .0, .0, GridBagConstraints.WEST, GridBagConstraints.NONE, Insets(0, 0, 0, 5), 0, 0))
 
+        plotRootsPlotButtonsFitButton.addActionListener {
+            store.mutateIfOther { store ->
+                val width = plotRootsPlotPlot.width
+                val height = plotRootsPlotPlot.height
+
+                val intervalAbscissa = store.plotAbscissaEnd - store.plotAbscissaBegin
+                val intervalOrdinate = store.plotOrdinateEnd - store.plotOrdinateBegin
+                val centerAbscissa = store.plotAbscissaBegin + intervalAbscissa / 2
+                val centerOrdinate = store.plotOrdinateBegin + intervalOrdinate / 2
+
+                val intervalOrdinateForAbscissa = intervalAbscissa * height / width
+                val intervalAbscissaForOrdinate = intervalOrdinate * width / height
+
+                val areaForAbscissa = intervalAbscissa * intervalOrdinateForAbscissa
+                val areaForOrdinate = intervalAbscissaForOrdinate * intervalOrdinate
+
+                val (newIntervalAbscissa, newIntervalOrdinate) =
+                        if (areaForAbscissa >= areaForOrdinate) {
+                            intervalAbscissa to (abs(intervalOrdinateForAbscissa) * if (intervalOrdinate < 0) -1 else 1)
+                        } else {
+                            (abs(intervalAbscissaForOrdinate) * if (intervalAbscissa < 0) -1 else 1) to intervalOrdinate
+                        }
+
+                return@mutateIfOther store.copy(
+                        plotAbscissaBegin = centerAbscissa - newIntervalAbscissa / 2,
+                        plotAbscissaEnd = centerAbscissa + newIntervalAbscissa / 2,
+                        plotOrdinateBegin = centerOrdinate - newIntervalOrdinate / 2,
+                        plotOrdinateEnd = centerOrdinate + newIntervalOrdinate / 2
+                )
+            }
+        }
         plotRootsPlotButtonsPanel.add(plotRootsPlotButtonsFitButton, GridBagConstraints(0, 0, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 0), 0, 0))
 
         plotRootsPlotButtonsSliceButton.addActionListener {

@@ -19,10 +19,8 @@ equation
 expr
     : '(' expr ')' #exprBraces
     | '|' expr '|' #exprAbs
-    | op='-' expr #exprUnaryMinus
     | <assoc=right> left=expr '^' right=expr #exprPower
-    | left=expr op=('*'|'/') right=expr #exprMultiplyDivide
-    | left=expr op=('+'|'-') right=expr #exprPlusMinus
+    | op='-' expr #exprUnaryMinus
     | op='sqrt' expr #exprFunction
     | op='sin' expr #exprFunction
     | op='cos' expr #exprFunction
@@ -34,6 +32,8 @@ expr
     | op='log' expr #exprFunction
     | op='ln' expr #exprFunction
     | op='lg' expr #exprFunction
+    | left=expr op=('*'|'/') right=expr #exprMultiplyDivide
+    | left=expr op=('+'|'-') right=expr #exprPlusMinus
     | variable #exprVariable
     | NUMBER #exprNumber
 ;

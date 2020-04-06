@@ -31,12 +31,12 @@ object BisectionMethod: EquationMethod {
     ): Pair<Double, Int> {
         val middle = begin + (end - begin) / 2
 
-        val xValue = equation.calculateAsFunction(mapOf(variable to middle))
+        val xValue = equation.evaluateAsFunction(mapOf(variable to middle))
         if (abs(end - begin) <= precision.precision || abs(xValue) < precision.precision || i >= precision.iterations) {
             return middle to i
         }
 
-        val aSign = sign(equation.calculateAsFunction(mapOf(variable to begin)))
+        val aSign = sign(equation.evaluateAsFunction(mapOf(variable to begin)))
         return if (aSign * sign(xValue) > 0) {
             bisect(equation, precision, variable, middle, end, i + 1)
         } else {

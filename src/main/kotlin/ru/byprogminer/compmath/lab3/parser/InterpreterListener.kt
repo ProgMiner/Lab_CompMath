@@ -2,6 +2,7 @@ package ru.byprogminer.compmath.lab3.parser
 
 import java.util.*
 import kotlin.math.*
+import kotlin.properties.Delegates
 
 class InterpreterListener(private val values: Map<String, Double>): EquationBaseListener() {
 
@@ -10,9 +11,17 @@ class InterpreterListener(private val values: Map<String, Double>): EquationBase
     val result: Double
         get() = stack.pop()
 
+    var left by Delegates.notNull<Double>()
+        private set
+
+    var right by Delegates.notNull<Double>()
+        private set
+
     override fun exitEquation(ctx: EquationParser.EquationContext) {
         val (left, right) = popLeftRight()
 
+        this.left = left
+        this.right = right
         stack.push(left - right)
     }
 

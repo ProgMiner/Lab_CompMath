@@ -16,13 +16,13 @@ private fun Equation.splitRoots(interval: Interval, variables: Set<String>, valu
     var current = interval.begin
     val result = Stream.builder<Pair<Double, Double>>()
     if (variables.size == 1) {
-        var previousValue = calculateAsFunction(values + mapOf(variable to current))
+        var previousValue = evaluateAsFunction(values + mapOf(variable to current))
         var previous = current
 
         repeat(interval.cuts) {
             current += step
 
-            val currentValue = calculateAsFunction(values + mapOf(variable to current))
+            val currentValue = evaluateAsFunction(values + mapOf(variable to current))
             if (!previousValue.isNaN() && !currentValue.isNaN() && currentValue * previousValue <= 0) {
                 result.add(previous to current)
             }

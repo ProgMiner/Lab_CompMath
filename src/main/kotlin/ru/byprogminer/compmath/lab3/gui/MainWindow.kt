@@ -485,6 +485,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
             modeSystemMethodButtons[store.systemMethod]?.isSelected = true
 
             // plotAbscissaVariable
+            plotRootsPlotAbscissaVariableComboBox.isEnabled = store.plotAbscissaVariable != null
             plotRootsPlotAbscissaVariableComboBox.selectedItem = store.plotAbscissaVariable
 
             // plotAbscissaBegin

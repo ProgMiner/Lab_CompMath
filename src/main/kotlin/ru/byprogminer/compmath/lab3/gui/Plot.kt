@@ -4,6 +4,7 @@ import ru.byprogminer.compmath.lab3.Store
 import ru.byprogminer.compmath.lab3.util.ReactiveHolder
 import java.awt.*
 import java.awt.image.BufferedImage
+import java.util.concurrent.CompletableFuture
 import javax.swing.JPanel
 import javax.swing.SwingUtilities
 import kotlin.math.abs
@@ -60,7 +61,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null) {
         val centerY = -store.plotOrdinateEnd * zoomY
 
         // Grid
-        val realGridStep = ceil(abs(min(intervalX, intervalY) / 100.0)).toInt() * 5
+        val realGridStep = ceil(abs(min(intervalX, intervalY) / 20.0)).toInt()
 
         if (intervalX != .0) {
             val gridStepX = realGridStep * zoomX * signX
@@ -128,7 +129,79 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null) {
             graphics.stroke = BasicStroke(1f)
         }
 
-        // TODO plots
+        // Plots
+        if (store.plotAbscissaVariable != null) {
+            val equations = when (store.mode) {
+                Store.Mode.EQUATION -> listOf(store.equation to store.equationColor)
+                Store.Mode.EQUATION_SYSTEM -> store.equations.toList()
+            }.filter { eq -> try {
+                eq.first.variables
+                return@filter true
+            } catch (e: UnsupportedOperationException) {
+                return@filter false
+            } }
+
+            val futures = mutableListOf<CompletableFuture<Void>>()
+            for ((equation, color) in equations) {
+                futures.add(CompletableFuture.runAsync {
+                    var realX = store.plotAbscissaBegin
+
+                    var prevY: Int? = null
+                    var prevLeft: Int? = null
+                    var prevRight: Int? = null
+                    for (x in 0 until width) {
+                        realX += 1 / zoomX
+
+                        val (realLeft, realRight) = equation.evaluate(store.plotSlice + mapOf(store.plotAbscissaVariable to realX))
+
+                        synchronized(graphics) {
+                            val actualPrevY = prevY
+                            val actualPrevLeft = prevLeft
+                            val actualPrevRight = prevRight
+
+                            graphics.color = color
+                            when (store.plotMode) {
+                                Store.PlotMode.EQUATIONS -> {
+                                    if (realLeft.isFinite()) {
+                                        val left = (centerY + realLeft * zoomY).toInt()
+
+                                        if (actualPrevLeft != null) {
+                                            graphics.drawLine(x - 1, actualPrevLeft, x, left)
+                                        }
+
+                                        prevLeft = left
+                                    }
+
+                                    if (realRight.isFinite()) {
+                                        val right = (centerY + realRight * zoomY).toInt()
+
+                                        if (actualPrevRight != null) {
+                                            graphics.drawLine(x - 1, actualPrevRight, x, right)
+                                        }
+
+                                        prevRight = right
+                                    }
+                                }
+
+                                Store.PlotMode.FUNCTIONS -> {
+                                    if (realLeft.isFinite() && realRight.isFinite()) {
+                                        val y = (centerY + (realLeft - realRight) * zoomY).toInt()
+
+                                        if (actualPrevY != null) {
+                                            graphics.drawLine(x - 1, actualPrevY, x, y)
+                                        }
+
+                                        prevY = y
+                                    }
+                                }
+                            }
+                        }
+                    }
+                })
+            }
+
+            CompletableFuture.allOf(*futures.toTypedArray()).join()
+        }
 
         // TODO roots
 

@@ -10,10 +10,16 @@ class InterpretingEquation(
         private val cst: EquationParser.EquationContext
 ): DefaultEquation(equation, variables) {
 
-    override fun calculateAsFunction(values: Map<String, Double>): Double {
+    override fun evaluate(values: Map<String, Double>): Pair<Double, Double> {
         val interpreter = InterpreterListener(values)
         ParseTreeWalker().walk(interpreter, cst)
 
-        return interpreter.result
+        return interpreter.left to interpreter.right
+    }
+
+    override fun evaluateAsFunction(values: Map<String, Double>): Double {
+        val (left, right) = evaluate(values)
+
+        return left - right
     }
 }

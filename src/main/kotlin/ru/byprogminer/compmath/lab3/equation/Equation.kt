@@ -4,5 +4,6 @@ interface Equation {
 
     val variables: Set<String>
 
-    fun calculateAsFunction(values: Map<String, Double>): Double
+    fun evaluate(values: Map<String, Double>): Pair<Double, Double>
+    fun evaluateAsFunction(values: Map<String, Double>): Double
 }

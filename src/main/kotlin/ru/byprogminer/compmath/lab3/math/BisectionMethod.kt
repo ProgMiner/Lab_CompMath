@@ -13,7 +13,7 @@ object BisectionMethod: EquationMethod {
         }
 
         if (equation.variables.size > 1) {
-            TODO("equations with many variables solving")
+            throw UnsupportedOperationException("equations of several variables is not supported")
         }
 
         val variable = equation.variables.first()

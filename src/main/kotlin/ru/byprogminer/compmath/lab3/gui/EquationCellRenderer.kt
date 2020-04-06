@@ -4,5 +4,5 @@ import javax.swing.table.DefaultTableCellRenderer
 
 class EquationCellRenderer: DefaultTableCellRenderer() {
 
-    //
+    // TODO
 }

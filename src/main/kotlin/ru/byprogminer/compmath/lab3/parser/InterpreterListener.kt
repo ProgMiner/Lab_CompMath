@@ -16,6 +16,10 @@ class InterpreterListener(private val values: Map<String, Double>): EquationBase
         stack.push(left - right)
     }
 
+    override fun exitExprAbs(ctx: EquationParser.ExprAbsContext?) {
+        stack.push(stack.pop().absoluteValue)
+    }
+
     override fun exitExprUnaryMinus(ctx: EquationParser.ExprUnaryMinusContext) {
         stack.push(-stack.pop())
     }

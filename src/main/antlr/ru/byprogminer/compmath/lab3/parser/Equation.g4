@@ -18,6 +18,7 @@ equation
 
 expr
     : '(' expr ')' #exprBraces
+    | '|' expr '|' #exprAbs
     | op='-' expr #exprUnaryMinus
     | <assoc=right> left=expr '^' right=expr #exprPower
     | left=expr op=('*'|'/') right=expr #exprMultiplyDivide

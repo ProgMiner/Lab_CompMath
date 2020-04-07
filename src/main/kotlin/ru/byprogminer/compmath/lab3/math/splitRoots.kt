@@ -2,6 +2,7 @@ package ru.byprogminer.compmath.lab3.math
 
 import ru.byprogminer.compmath.lab3.equation.Equation
 import java.util.stream.Stream
+import kotlin.math.sign
 
 fun Equation.splitRoots(interval: Interval): Stream<Pair<Double, Double>> {
     return splitRoots(interval, variables, emptyMap())
@@ -16,14 +17,17 @@ private fun Equation.splitRoots(interval: Interval, variables: Set<String>, valu
     var current = interval.begin
     val result = Stream.builder<Pair<Double, Double>>()
     if (variables.size == 1) {
-        var previousValue = evaluateAsFunction(values + mapOf(variable to current))
+        var previousValue = sign(evaluateAsFunction(values + mapOf(variable to current)))
         var previous = current
 
         repeat(interval.cuts) {
             current += step
 
-            val currentValue = evaluateAsFunction(values + mapOf(variable to current))
-            if (!previousValue.isNaN() && !currentValue.isNaN() && currentValue * previousValue <= 0) {
+            val currentValue = sign(evaluateAsFunction(values + mapOf(variable to current)))
+            if (
+                    previousValue == .0 || currentValue == .0 ||
+                    (!previousValue.isNaN() && !currentValue.isNaN() && currentValue != previousValue)
+            ) {
                 result.add(previous to current)
             }
 

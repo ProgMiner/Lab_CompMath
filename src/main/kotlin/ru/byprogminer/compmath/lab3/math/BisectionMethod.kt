@@ -18,7 +18,7 @@ object BisectionMethod: EquationMethod {
 
         val variable = equation.variables.first()
         return equation.splitRoots(interval).map { (begin, end) -> bisect(equation, precision, variable, begin, end) }
-                .map { (x, i) -> mapOf(variable to x) to i }.collect(Collectors.toSet())
+                .filter { (x, _) -> x.isFinite() }.map { (x, i) -> mapOf(variable to x) to i }.collect(Collectors.toSet())
     }
 
     private tailrec fun bisect(
@@ -37,7 +37,8 @@ object BisectionMethod: EquationMethod {
         }
 
         val aSign = sign(equation.evaluateAsFunction(mapOf(variable to begin)))
-        return if (aSign * sign(xValue) > 0) {
+        val bSign = sign(equation.evaluateAsFunction(mapOf(variable to end)))
+        return if (aSign == sign(xValue) || sign(xValue) != bSign) {
             bisect(equation, precision, variable, middle, end, i + 1)
         } else {
             bisect(equation, precision, variable, begin, middle, i + 1)

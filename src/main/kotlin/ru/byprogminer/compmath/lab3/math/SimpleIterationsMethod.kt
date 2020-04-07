@@ -22,8 +22,14 @@ object SimpleIterationsMethod: EquationMethod {
         return equation.splitRoots(interval).map { (begin, end) ->
             val l = -1 / max(derivative(equation, variable, begin), derivative(equation, variable, end))
 
-            simpleIteration(equation, precision, variable, l, begin + (end - begin) / 2)
-        }.map { (x, i) -> mapOf(variable to x) to i }.collect(Collectors.toSet())
+            val approximation = listOf(
+                    abs(equation.evaluateAsFunction(mapOf(variable to begin))) to begin,
+                    abs(equation.evaluateAsFunction(mapOf(variable to begin + (end - begin) / 2))) to (begin + (end - begin) / 2),
+                    abs(equation.evaluateAsFunction(mapOf(variable to end))) to end
+            ).minBy { (f, _) -> f }!!.second
+
+            simpleIteration(equation, precision, variable, l, approximation)
+        }.filter { (x, _) -> x.isFinite() }.map { (x, i) -> mapOf(variable to x) to i }.collect(Collectors.toSet())
     }
 
     private tailrec fun simpleIteration(

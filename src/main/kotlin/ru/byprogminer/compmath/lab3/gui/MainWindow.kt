@@ -380,20 +380,6 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         plotRootsPlotPanel.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
         plotRootsTabbedPane.add(plotRootsPlotPanel, "Plot")
 
-        plotRootsRootsTableModel.addTableModelListener {
-            val st = store.get()
-
-            val manyVarsEquation = st.mode == Store.Mode.EQUATION && st.variables.size > 1
-            val validEquation = st.variables.isNotEmpty()
-            val noRoots = st.roots.isNullOrEmpty()
-            val inProgress = st.roots == null
-
-            plotRootsRootsTableNoEquationsPlaceholder.isVisible = !validEquation
-            plotRootsRootsTableNoRootsPlaceholder.isVisible = !inProgress && noRoots
-            plotRootsRootsTableEquationsOfSeveralVariablesPlaceholder.isVisible = manyVarsEquation
-            plotRootsRootsTableProgressBar.isVisible = !manyVarsEquation && validEquation && inProgress
-            plotRootsRootsTable.repaint()
-        }
         plotRootsRootsTable.layout = GridBagLayout()
         plotRootsRootsTable.fillsViewportHeight = true
         plotRootsRootsTable.add(plotRootsRootsTableNoEquationsPlaceholder, GridBagConstraints(0, 0, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.NONE, Insets(0, 0, 0, 0), 0, 0))
@@ -496,6 +482,18 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
 
             // systemMethod
             modeSystemMethodButtons[store.systemMethod]?.isSelected = true
+
+            // roots
+            val manyVarsEquation = store.mode == Store.Mode.EQUATION && store.variables.size > 1
+            val validEquation = store.variables.isNotEmpty()
+            val noRoots = store.roots.isNullOrEmpty()
+            val inProgress = store.roots == null
+
+            plotRootsRootsTableNoEquationsPlaceholder.isVisible = !validEquation
+            plotRootsRootsTableNoRootsPlaceholder.isVisible = !inProgress && noRoots
+            plotRootsRootsTableEquationsOfSeveralVariablesPlaceholder.isVisible = manyVarsEquation
+            plotRootsRootsTableProgressBar.isVisible = !manyVarsEquation && validEquation && inProgress
+            plotRootsRootsTable.repaint()
 
             // plotAbscissaVariable
             plotRootsPlotAbscissaVariableComboBox.isEnabled = store.plotAbscissaVariable != null

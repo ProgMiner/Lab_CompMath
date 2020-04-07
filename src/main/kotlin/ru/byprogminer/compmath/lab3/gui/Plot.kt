@@ -11,6 +11,7 @@ import javax.swing.JPanel
 import javax.swing.SwingUtilities
 import kotlin.math.abs
 import kotlin.math.ceil
+import kotlin.math.max
 import kotlin.math.min
 
 class Plot(private val store: ReactiveHolder<Store>): JPanel(null) {
@@ -24,11 +25,16 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null) {
         val ABSCISSA_COLOR: Color = Color.RED
         val ORDINATE_COLOR: Color = Color.GREEN
         val APPLICATE_COLOR: Color = Color.BLUE
+
+        const val ARROWS_LENGTH = 45
     }
 
     private var buffer: BufferedImage? = null
 
     init {
+        background = BACKGROUND_COLOR
+        foreground = AXES_COLOR
+
         addComponentListener(object: ComponentAdapter() {
 
             fun componentUpdated() {
@@ -70,7 +76,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null) {
             graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
         }
 
-        graphics.color = BACKGROUND_COLOR
+        graphics.color = background
         graphics.fillRect(0, 0, width, height)
 
         val intervalX = store.plotAbscissaEnd - store.plotAbscissaBegin
@@ -95,7 +101,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null) {
                 graphics.color = GRID_COLOR
                 graphics.drawLine(currentGridLineX.toInt(), 0, currentGridLineX.toInt(), height)
 
-                graphics.color = AXES_COLOR
+                graphics.color = foreground
                 graphics.drawLine(currentGridLineX.toInt(), (centerY - 3).toInt(), currentGridLineX.toInt(), (centerY + 3).toInt())
 
                 if (currentRealGridLineX != 0) {
@@ -114,7 +120,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null) {
                 graphics.color = GRID_COLOR
                 graphics.drawLine(0, currentGridLineY.toInt(), width, currentGridLineY.toInt())
 
-                graphics.color = AXES_COLOR
+                graphics.color = foreground
                 graphics.drawLine((centerX - 3).toInt(), currentGridLineY.toInt(), (centerX + 3).toInt(), currentGridLineY.toInt())
 
                 if (currentRealGridLineY != 0) {
@@ -136,10 +142,13 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null) {
                 graphics.drawLine(x.toInt(), 0, x.toInt(), height)
                 x += step
             }
+
+            graphics.color = Color(0x1F000000 or (INTERVAL_COLOR.rgb and 0xFFFFFF), true)
+            graphics.fillRect((centerX + store.begin * zoomX).toInt(), 0, ((store.end - store.begin) * zoomX).toInt(), height)
         }
 
         // Axes
-        graphics.color = AXES_COLOR
+        graphics.color = foreground
         graphics.drawLine(0, centerY.toInt(), width, centerY.toInt())
         graphics.drawLine(centerX.toInt(), 0, centerX.toInt(), height)
 
@@ -149,20 +158,36 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null) {
         }
 
         // Abscissa arrow
+        val abscissaArrowY = min(max(centerY, .0), height.toDouble())
+
+        val abscissaArrowX = if (signX >= 0) {
+            min(max(centerX, .0), (width - ARROWS_LENGTH).toDouble())
+        } else {
+            min(max(centerX, ARROWS_LENGTH.toDouble()), width.toDouble())
+        }
+
         graphics.color = ABSCISSA_COLOR
-        graphics.drawLine(centerX.toInt(), centerY.toInt(), (centerX + 45 * signX).toInt(), centerY.toInt())
-        graphics.drawLine((centerX + 35 * signX).toInt(), (centerY - 5).toInt(), (centerX + 45 * signX).toInt(), centerY.toInt())
-        graphics.drawLine((centerX + 35 * signX).toInt(), (centerY + 5).toInt(), (centerX + 45 * signX).toInt(), centerY.toInt())
+        graphics.drawLine(abscissaArrowX.toInt(), abscissaArrowY.toInt(), (abscissaArrowX + ARROWS_LENGTH * signX).toInt(), abscissaArrowY.toInt())
+        graphics.drawLine((abscissaArrowX + ARROWS_LENGTH * 0.78 * signX).toInt(), (abscissaArrowY - ARROWS_LENGTH * 0.11).toInt(), (abscissaArrowX + ARROWS_LENGTH * signX).toInt(), abscissaArrowY.toInt())
+        graphics.drawLine((abscissaArrowX + ARROWS_LENGTH * 0.78 * signX).toInt(), (abscissaArrowY + ARROWS_LENGTH * 0.11).toInt(), (abscissaArrowX + ARROWS_LENGTH * signX).toInt(), abscissaArrowY.toInt())
 
         // Ordinate arrow
+        val ordinateArrowX = min(max(centerX, .0), width.toDouble())
+
+        val ordinateArrowY = if (signY >= 0) {
+            min(max(centerY,  ARROWS_LENGTH.toDouble()), height.toDouble())
+        } else {
+            min(max(centerY,  .0), (height - ARROWS_LENGTH).toDouble())
+        }
+
         graphics.color = ORDINATE_COLOR
-        graphics.drawLine(centerX.toInt(), centerY.toInt(), centerX.toInt(), (centerY + 45 * signY).toInt())
-        graphics.drawLine((centerX - 5).toInt(), (centerY + 35 * signY).toInt(), centerX.toInt(), (centerY + 45 * signY).toInt())
-        graphics.drawLine((centerX + 5).toInt(), (centerY + 35 * signY).toInt(), centerX.toInt(), (centerY + 45 * signY).toInt())
+        graphics.drawLine(ordinateArrowX.toInt(), ordinateArrowY.toInt(), ordinateArrowX.toInt(), (ordinateArrowY + ARROWS_LENGTH * signY).toInt())
+        graphics.drawLine((ordinateArrowX - ARROWS_LENGTH * 0.11).toInt(), (ordinateArrowY + ARROWS_LENGTH * 0.78 * signY).toInt(), ordinateArrowX.toInt(), (ordinateArrowY + ARROWS_LENGTH * signY).toInt())
+        graphics.drawLine((ordinateArrowX + ARROWS_LENGTH * 0.11).toInt(), (ordinateArrowY + ARROWS_LENGTH * 0.78 * signY).toInt(), ordinateArrowX.toInt(), (ordinateArrowY + ARROWS_LENGTH * signY).toInt())
 
         // Applicate point
         graphics.color = APPLICATE_COLOR
-        graphics.drawLine(centerX.toInt(), centerY.toInt(), centerX.toInt(), centerY.toInt())
+        graphics.drawLine(ordinateArrowX.toInt(), abscissaArrowY.toInt(), ordinateArrowX.toInt(), abscissaArrowY.toInt())
 
         if (graphics is Graphics2D) {
             graphics.stroke = BasicStroke(1f)
@@ -258,8 +283,8 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null) {
             val borderInsets = border.getBorderInsets(this)
 
             return Dimension(
-                    width + 2 - borderInsets.left - borderInsets.right,
-                    height + 2 - borderInsets.top - borderInsets.bottom
+                    width + 1 - borderInsets.left - borderInsets.right,
+                    height + 1 - borderInsets.top - borderInsets.bottom
             )
         }
 

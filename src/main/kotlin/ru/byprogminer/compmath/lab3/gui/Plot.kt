@@ -175,9 +175,9 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null) {
         val ordinateArrowX = min(max(centerX, .0), width.toDouble())
 
         val ordinateArrowY = if (signY >= 0) {
-            min(max(centerY,  ARROWS_LENGTH.toDouble()), height.toDouble())
+            min(max(centerY, .0), (height - ARROWS_LENGTH).toDouble())
         } else {
-            min(max(centerY,  .0), (height - ARROWS_LENGTH).toDouble())
+            min(max(centerY, ARROWS_LENGTH.toDouble()), height.toDouble())
         }
 
         graphics.color = ORDINATE_COLOR

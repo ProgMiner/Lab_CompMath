@@ -21,6 +21,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
 
         private val ADD_ICON = createImageIcon("add.png").scale(16, 16)
         private val REMOVE_ICON = createImageIcon("remove.png").scale(16, 16)
+        private val SWAP_ICON = createImageIcon("swap.png").scale(16, 16)
 
         private val INVALID_VALUE_COLOR = Color.RED
     }
@@ -80,11 +81,13 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
     private val plotRootsPlotAbscissaBeginField = JTextField(8)
     private val plotRootsPlotAbscissaToLabel = JLabel("to")
     private val plotRootsPlotAbscissaEndField = JTextField(8)
+    private val plotRootsPlotAbscissaSwapButton = JButton(SWAP_ICON)
     private val plotRootsPlotOrdinateLabel = JLabel("Ordinate:")
     private val plotRootsPlotOrdinateFromLabel = JLabel("from")
     private val plotRootsPlotOrdinateBeginField = JTextField(8)
     private val plotRootsPlotOrdinateToLabel = JLabel("to")
     private val plotRootsPlotOrdinateEndField = JTextField(8)
+    private val plotRootsPlotOrdinateSwapButton = JButton(SWAP_ICON)
     private val plotRootsPlotModeLabel = JLabel("Mode:")
     private val plotRootsPlotModePanel = JPanel(GridBagLayout())
     private val plotRootsPlotModeButtonGroup = ButtonGroup()
@@ -293,6 +296,18 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         })
         plotRootsPlotPanel.add(plotRootsPlotAbscissaEndField, GridBagConstraints(4, 1, 1, 1, 1.0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 5), 0, 0))
 
+        plotRootsPlotAbscissaSwapButton.addActionListener {
+            store.mutateIfOther { store ->
+                store.copy(
+                        plotAbscissaBegin = store.plotAbscissaEnd,
+                        plotAbscissaEnd = store.plotAbscissaBegin
+                )
+            }
+        }
+        plotRootsPlotAbscissaSwapButton.minimumSize = Dimension(20, 20)
+        plotRootsPlotAbscissaSwapButton.preferredSize = Dimension(20, 20)
+        plotRootsPlotPanel.add(plotRootsPlotAbscissaSwapButton, GridBagConstraints(5, 1, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.NONE, Insets(0, 0, 5, 5), 0, 0))
+
         plotRootsPlotPanel.add(plotRootsPlotOrdinateLabel, GridBagConstraints(0, 2, 1, 1, .0, .0, GridBagConstraints.EAST, GridBagConstraints.NONE, Insets(0, 0, 5, 5), 0, 0))
         plotRootsPlotPanel.add(plotRootsPlotOrdinateFromLabel, GridBagConstraints(1, 2, 1, 1, .0, .0, GridBagConstraints.BASELINE, GridBagConstraints.NONE, Insets(0, 0, 5, 5), 0, 0))
 
@@ -330,6 +345,19 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
             }
         })
         plotRootsPlotPanel.add(plotRootsPlotOrdinateEndField, GridBagConstraints(4, 2, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 5), 0, 0))
+
+        plotRootsPlotOrdinateSwapButton.addActionListener {
+            store.mutateIfOther { store ->
+                store.copy(
+                        plotOrdinateBegin = store.plotOrdinateEnd,
+                        plotOrdinateEnd = store.plotOrdinateBegin
+                )
+            }
+        }
+        plotRootsPlotOrdinateSwapButton.minimumSize = Dimension(20, 20)
+        plotRootsPlotOrdinateSwapButton.preferredSize = Dimension(20, 20)
+        plotRootsPlotPanel.add(plotRootsPlotOrdinateSwapButton, GridBagConstraints(5, 2, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.NONE, Insets(0, 0, 5, 5), 0, 0))
+
         plotRootsPlotPanel.add(plotRootsPlotModeLabel, GridBagConstraints(0, 3, 1, 1, .0, .0, GridBagConstraints.EAST, GridBagConstraints.NONE, Insets(0, 0, 0, 5), 0, 0))
 
         plotRootsPlotModeButtons.toList().forEachIndexed { i, (_, button) ->
@@ -376,7 +404,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
 
         plotRootsPlotButtonsSliceWindow.setLocationRelativeTo(this)
         plotRootsPlotButtonsPanel.add(plotRootsPlotButtonsSliceButton, GridBagConstraints(0, 1, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 0), 0, 0))
-        plotRootsPlotPanel.add(plotRootsPlotButtonsPanel, GridBagConstraints(5, 1, 1, 3, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 0, 0), 0, 0))
+        plotRootsPlotPanel.add(plotRootsPlotButtonsPanel, GridBagConstraints(6, 1, 1, 3, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 0, 0), 0, 0))
         plotRootsPlotPanel.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
         plotRootsTabbedPane.add(plotRootsPlotPanel, "Plot")
 

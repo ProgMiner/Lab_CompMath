@@ -144,7 +144,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null) {
             }
 
             graphics.color = Color(0x1F000000 or (INTERVAL_COLOR.rgb and 0xFFFFFF), true)
-            graphics.fillRect((centerX + store.begin * zoomX).toInt(), 0, ((store.end - store.begin) * zoomX).toInt(), height)
+            graphics.fillRect((centerX + store.begin * zoomX * signX).toInt(), 0, ((store.end - store.begin) * zoomX * signX).toInt(), height)
         }
 
         // Axes

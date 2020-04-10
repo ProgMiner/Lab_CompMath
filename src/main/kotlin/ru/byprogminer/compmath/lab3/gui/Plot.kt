@@ -3,8 +3,7 @@ package ru.byprogminer.compmath.lab3.gui
 import ru.byprogminer.compmath.lab3.Store
 import ru.byprogminer.compmath.lab3.util.ReactiveHolder
 import java.awt.*
-import java.awt.event.ComponentAdapter
-import java.awt.event.ComponentEvent
+import java.awt.event.*
 import java.awt.image.BufferedImage
 import java.util.concurrent.CompletableFuture
 import javax.swing.JPanel
@@ -14,7 +13,8 @@ import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
 
-class Plot(private val store: ReactiveHolder<Store>): JPanel(null) {
+class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentListener,
+        MouseListener, MouseMotionListener, MouseWheelListener {
 
     companion object {
 
@@ -31,37 +31,32 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null) {
 
     private var buffer: BufferedImage? = null
 
+    private var mouseX = -1
+    private var mouseY = -1
+
+    private val sizeWithoutBorder: Dimension
+        get() {
+            val borderInsets = border.getBorderInsets(this)
+
+            return Dimension(
+                    width + 1 - borderInsets.left - borderInsets.right,
+                    height + 1 - borderInsets.top - borderInsets.bottom
+            )
+        }
+
     init {
         background = BACKGROUND_COLOR
         foreground = AXES_COLOR
 
-        addComponentListener(object: ComponentAdapter() {
-
-            fun componentUpdated() {
-                buffer = null
-                repaint()
-            }
-
-            override fun componentMoved(e: ComponentEvent?) {
-                componentUpdated()
-            }
-
-            override fun componentResized(e: ComponentEvent?) {
-                componentUpdated()
-            }
-
-            override fun componentShown(e: ComponentEvent?) {
-                componentUpdated()
-            }
-        })
+        addMouseListener(this)
+        addMouseMotionListener(this)
+        addMouseWheelListener(this)
+        addComponentListener(this)
 
         // Dummy Kotlin
         @Suppress("RedundantLambdaArrow")
         store.onChange.listeners.add { _ ->
-            SwingUtilities.invokeLater {
-                buffer = null
-                repaint()
-            }
+            SwingUtilities.invokeLater(this::invalidateBuffer)
         }
     }
 
@@ -278,15 +273,10 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null) {
         buffer = newBuffer
     }
 
-    private val sizeWithoutBorder: Dimension
-        get() {
-            val borderInsets = border.getBorderInsets(this)
-
-            return Dimension(
-                    width + 1 - borderInsets.left - borderInsets.right,
-                    height + 1 - borderInsets.top - borderInsets.bottom
-            )
-        }
+    private fun invalidateBuffer() {
+        buffer = null
+        repaint()
+    }
 
     override fun paintComponent(g: Graphics) {
         super.paintComponent(g)
@@ -298,4 +288,81 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null) {
         val borderInsets = border.getBorderInsets(this)
         g.drawImage(buffer, borderInsets.left - 1, borderInsets.top - 1, null)
     }
+
+    override fun mouseClicked(e: MouseEvent) {
+        // TODO add roots selecting
+    }
+
+    override fun mouseMoved(e: MouseEvent) {
+        mouseX = e.x
+        mouseY = e.y
+    }
+
+    override fun mouseDragged(e: MouseEvent) {
+        val mousePressed = e.button or MouseEvent.BUTTON1 != MouseEvent.NOBUTTON
+
+        if (mousePressed) {
+            val deltaX = e.x - mouseX
+            val deltaY = e.y - mouseY
+
+            store.mutateIfOther { store ->
+                val (width, height) = sizeWithoutBorder.run { width to height }
+
+                val intervalX = store.plotAbscissaEnd - store.plotAbscissaBegin
+                val intervalY = store.plotOrdinateEnd - store.plotOrdinateBegin
+
+                val zoomX = intervalX / width
+                val zoomY = -intervalY / height
+                return@mutateIfOther store.copy(
+                        plotAbscissaBegin = store.plotAbscissaBegin - deltaX * zoomX,
+                        plotAbscissaEnd = store.plotAbscissaEnd - deltaX * zoomX,
+                        plotOrdinateBegin = store.plotOrdinateBegin - deltaY * zoomY,
+                        plotOrdinateEnd = store.plotOrdinateEnd - deltaY * zoomY
+                )
+            }
+        }
+
+        mouseX = e.x
+        mouseY = e.y
+    }
+
+    override fun mouseWheelMoved(e: MouseWheelEvent) {
+        val amount: Double = e.wheelRotation.toDouble() * 1.68
+
+        store.mutateIfOther { store ->
+            val zoomX = amount / 2
+            val zoomY = amount / 2
+
+            // TODO mouse position priority
+
+            store.copy(
+                    plotAbscissaBegin = store.plotAbscissaBegin - zoomX,
+                    plotAbscissaEnd = store.plotAbscissaEnd + zoomX,
+                    plotOrdinateBegin = store.plotOrdinateBegin - zoomY,
+                    plotOrdinateEnd = store.plotOrdinateEnd + zoomY
+            )
+        }
+    }
+
+    override fun componentMoved(e: ComponentEvent?) {
+        invalidateBuffer()
+    }
+
+    override fun componentResized(e: ComponentEvent?) {
+        invalidateBuffer()
+    }
+
+    override fun componentShown(e: ComponentEvent?) {
+        invalidateBuffer()
+    }
+
+    override fun componentHidden(e: ComponentEvent?) {}
+
+    override fun mouseEntered(e: MouseEvent) {}
+
+    override fun mouseExited(e: MouseEvent) {}
+
+    override fun mousePressed(e: MouseEvent) {}
+
+    override fun mouseReleased(e: MouseEvent) {}
 }

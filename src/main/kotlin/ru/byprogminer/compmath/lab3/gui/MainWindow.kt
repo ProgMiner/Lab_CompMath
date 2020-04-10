@@ -528,7 +528,10 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
 
             // plotAbscissaVariable
             plotRootsPlotAbscissaVariableComboBox.isEnabled = store.plotAbscissaVariable != null
-            plotRootsPlotAbscissaVariableComboBox.selectedItem = store.plotAbscissaVariable
+
+            if (plotRootsPlotAbscissaVariableComboBox.selectedItem != store.plotAbscissaVariable) {
+                plotRootsPlotAbscissaVariableComboBox.selectedItem = store.plotAbscissaVariable
+            }
 
             // plotAbscissaBegin
             if (plotRootsPlotAbscissaBeginField.text.toDoubleOrNull() != store.plotAbscissaBegin) {

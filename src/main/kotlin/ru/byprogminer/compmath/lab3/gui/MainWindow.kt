@@ -13,6 +13,7 @@ import ru.byprogminer.compmath.lab3.util.ReactiveHolder
 import ru.byprogminer.compmath.lab3.util.reactiveHolder
 import java.awt.*
 import javax.swing.*
+import kotlin.concurrent.thread
 import kotlin.math.abs
 
 class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION") {
@@ -51,9 +52,9 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
     private val modeEquationMethodButtons = mapOf(
             "Bisection method" to BisectionMethod,
             "Simple iterations method" to SimpleIterationsMethod
-    ).map { (name, method) -> method to JRadioButton(name).also { it.addActionListener {
+    ).map { (name, method) -> method to JRadioButton(name).also { it.addActionListener { manualChange {
         store.mutateIfOther { store -> store.copy(method = method) }
-    } }.also(modeEquationMethodButtonGroup::add) }.toMap()
+    } } }.also(modeEquationMethodButtonGroup::add) }.toMap()
 
     private val modeSystemPanel = JPanel(GridBagLayout())
     private val modeSystemEquationsLabel = JLabel("System equations:")
@@ -66,9 +67,9 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
     private val modeSystemMethodButtonGroup = ButtonGroup()
     private val modeSystemMethodButtons = mapOf(
             "Newton's method" to NewtonsMethod
-    ).map { (name, method) -> method to JRadioButton(name).also { it.addActionListener {
+    ).map { (name, method) -> method to JRadioButton(name).also { it.addActionListener { manualChange {
         store.mutateIfOther { store -> store.copy(systemMethod = method) }
-    } }.also(modeSystemMethodButtonGroup::add) }.toMap()
+    } } }.also(modeSystemMethodButtonGroup::add) }.toMap()
 
     private val plotRootsTabbedPane = JTabbedPane()
     private val plotRootsPlotPanel = JPanel(GridBagLayout())
@@ -94,9 +95,9 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
     private val plotRootsPlotModeButtons = mapOf(
             "Equations" to Store.PlotMode.EQUATIONS,
             "Functions" to Store.PlotMode.FUNCTIONS
-    ).map { (name, mode) -> mode to JRadioButton(name).also { it.addActionListener {
+    ).map { (name, mode) -> mode to JRadioButton(name).also { it.addActionListener { manualChange {
         store.mutateIfOther { store -> store.copy(plotMode = mode) }
-    } }.also(plotRootsPlotModeButtonGroup::add) }.toMap()
+    } } }.also(plotRootsPlotModeButtonGroup::add) }.toMap()
 
     private val plotRootsPlotButtonsPanel = JPanel(GridBagLayout())
     private val plotRootsPlotButtonsFitButton = JButton("Fit 1x1")
@@ -114,40 +115,41 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
     private val defaultTextAreaBackgroundColor = modeEquationEquationArea.background
 
     private val selectedSystemEquation = reactiveHolder<Int?>(null)
+    private var onStoreChangeRun = false
 
     init {
         precisionIntervalIntervalPanel.add(precisionIntervalIntervalStartLabel, GridBagConstraints(0, 0, 1, 1, .0, .0, GridBagConstraints.BASELINE_TRAILING, GridBagConstraints.NONE, Insets(0, 0, 5, 5), 0, 0))
 
-        precisionIntervalIntervalStartField.document.addDocumentListener(documentAdapter {
+        precisionIntervalIntervalStartField.document.addDocumentListener(documentAdapter { manualChange {
             store.mutateIfOther { store -> store.copy(begin = precisionIntervalIntervalStartField.text.toDoubleOrNull()) }
-        })
+        } })
         precisionIntervalIntervalPanel.add(precisionIntervalIntervalStartField, GridBagConstraints(1, 0, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 0), 0, 0))
         precisionIntervalIntervalPanel.add(precisionIntervalIntervalEndLabel, GridBagConstraints(0, 1, 1, 1, .0, .0, GridBagConstraints.BASELINE_TRAILING, GridBagConstraints.NONE, Insets(0, 0, 5, 5), 0, 0))
 
-        precisionIntervalIntervalEndField.document.addDocumentListener(documentAdapter {
+        precisionIntervalIntervalEndField.document.addDocumentListener(documentAdapter { manualChange {
             store.mutateIfOther { store -> store.copy(end = precisionIntervalIntervalEndField.text.toDoubleOrNull()) }
-        })
+        } })
         precisionIntervalIntervalPanel.add(precisionIntervalIntervalEndField, GridBagConstraints(1, 1, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 0), 0, 0))
         precisionIntervalIntervalPanel.add(precisionIntervalIntervalCutsLabel, GridBagConstraints(0, 2, 1, 1, .0, .0, GridBagConstraints.BASELINE_TRAILING, GridBagConstraints.NONE, Insets(0, 0, 0, 5), 0, 0))
 
-        precisionIntervalIntervalCutsField.document.addDocumentListener(documentAdapter {
+        precisionIntervalIntervalCutsField.document.addDocumentListener(documentAdapter { manualChange {
             store.mutateIfOther { store -> store.copy(cuts = precisionIntervalIntervalCutsField.text.toIntOrNull()) }
-        })
+        } })
         precisionIntervalIntervalPanel.add(precisionIntervalIntervalCutsField, GridBagConstraints(1, 2, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 0), 0, 0))
         precisionIntervalIntervalPanel.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
         precisionIntervalTabbedPane.add(precisionIntervalIntervalPanel, "Interval")
 
         precisionIntervalPrecisionPanel.add(precisionIntervalPrecisionPrecisionLabel, GridBagConstraints(0, 0, 1, 1, .0, .0, GridBagConstraints.BASELINE_TRAILING, GridBagConstraints.NONE, Insets(0, 0, 5, 5), 0, 0))
 
-        precisionIntervalPrecisionPrecisionField.document.addDocumentListener(documentAdapter {
+        precisionIntervalPrecisionPrecisionField.document.addDocumentListener(documentAdapter { manualChange {
             store.mutateIfOther { store -> store.copy(precision = precisionIntervalPrecisionPrecisionField.text.toDoubleOrNull()) }
-        })
+        } })
         precisionIntervalPrecisionPanel.add(precisionIntervalPrecisionPrecisionField, GridBagConstraints(1, 0, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 0), 0, 0))
         precisionIntervalPrecisionPanel.add(precisionIntervalPrecisionIterationsLabel, GridBagConstraints(0, 1, 1, 1, .0, .0, GridBagConstraints.BASELINE_TRAILING, GridBagConstraints.NONE, Insets(0, 0, 0, 5), 0, 0))
 
-        precisionIntervalPrecisionIterationsField.document.addDocumentListener(documentAdapter {
+        precisionIntervalPrecisionIterationsField.document.addDocumentListener(documentAdapter { manualChange {
             store.mutateIfOther { store -> store.copy(iterations = precisionIntervalPrecisionIterationsField.text.toIntOrNull()) }
-        })
+        } })
         precisionIntervalPrecisionPanel.add(precisionIntervalPrecisionIterationsField, GridBagConstraints(1, 1, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 0), 0, 0))
         precisionIntervalPrecisionPanel.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
         precisionIntervalTabbedPane.add(precisionIntervalPrecisionPanel, "Precision")
@@ -166,9 +168,9 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         }
         modeEquationPanel.add(modeEquationColorButton, GridBagConstraints(1, 0, 1, 1, .0, .0, GridBagConstraints.BASELINE, GridBagConstraints.NONE, Insets(0, 0, 5, 0), 0, 0))
 
-        modeEquationEquationArea.document.addDocumentListener(documentAdapter {
+        modeEquationEquationArea.document.addDocumentListener(documentAdapter { manualChange {
             store.mutateIfOther { store -> store.copy(equation = parse(modeEquationEquationArea.text)) }
-        })
+        } })
         modeEquationPanel.add(modeEquationEquationPane, GridBagConstraints(0, 1, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 5, 0), 0, 0))
 
         modeEquationMethodButtons.toList().forEachIndexed { i, (_, button) ->
@@ -204,14 +206,14 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         }
         modeSystemPanel.add(modeSystemRemoveEquationButton, GridBagConstraints(2, 0, 1, 1, .0, .0, GridBagConstraints.BASELINE, GridBagConstraints.NONE, Insets(0, 0, 5, 0), 0, 0))
 
-        modeSystemEquationsTable.selectionModel.addListSelectionListener {
+        modeSystemEquationsTable.selectionModel.addListSelectionListener { manualChange {
             selectedSystemEquation.setIfOther(modeSystemEquationsTable.selectedRow.let {
                 when (it) {
                     -1 -> null
                     else -> it
                 }
             })
-        }
+        } }
         modeSystemEquationsTableModel.addTableModelListener {
             val oldIndex = selectedSystemEquation.get()
 
@@ -243,25 +245,25 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         modeSystemPanel.add(modeSystemMethodPanel, GridBagConstraints(0, 2, 3, 1, .0, .0, GridBagConstraints.SOUTH, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 0), 0, 0))
         modeSystemPanel.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
         modeTabbedPane.add(modeSystemPanel, "Equations system")
-        modeTabbedPane.addChangeListener {
+        modeTabbedPane.addChangeListener { manualChange {
             store.mutateIfOther { store -> store.copy(mode = Store.Mode.values()[modeTabbedPane.selectedIndex]) }
-        }
+        } }
         _contentPane.add(modeTabbedPane, GridBagConstraints(0, 1, 1, 1, .0, 1.0, GridBagConstraints.SOUTHWEST, GridBagConstraints.VERTICAL, Insets(0, 0, 0, 5), 0, 0))
 
         plotRootsPlotPlot.border = BorderFactory.createLineBorder(null)
         plotRootsPlotPanel.add(plotRootsPlotPlot, GridBagConstraints(0, 0, 7, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 5, 0), 0, 0))
 
-        plotRootsPlotAbscissaVariableComboBox.addActionListener {
+        plotRootsPlotAbscissaVariableComboBox.addActionListener { manualChange {
             store.mutateIfOther { store ->
                 store.copy(plotAbscissaVariable = plotRootsPlotAbscissaVariableComboBoxModel.selectedItem)
             }
-        }
+        } }
         plotRootsPlotAbscissaVariablePanel.add(plotRootsPlotAbscissaVariableComboBox, GridBagConstraints(0, 1, 1, 1, 1.0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 0), 0, 0))
         plotRootsPlotAbscissaVariablePanel.add(plotRootsPlotAbscissaVariableColonLabel, GridBagConstraints(1, 1, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.NONE, Insets(0, 0, 0, 0), 0, 0))
         plotRootsPlotPanel.add(plotRootsPlotAbscissaVariablePanel, GridBagConstraints(0, 1, 1, 1, .0, .0, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 5), 0, 0))
         plotRootsPlotPanel.add(plotRootsPlotAbscissaFromLabel, GridBagConstraints(1, 1, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.NONE, Insets(0, 0, 5, 5), 0, 0))
 
-        plotRootsPlotAbscissaBeginField.document.addDocumentListener(documentAdapter {
+        plotRootsPlotAbscissaBeginField.document.addDocumentListener(documentAdapter { manualChange {
             val value = plotRootsPlotAbscissaBeginField.text.toDoubleOrNull()
 
             if (value != null) {
@@ -275,11 +277,11 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
             } else {
                 INVALID_VALUE_COLOR
             }
-        })
+        } })
         plotRootsPlotPanel.add(plotRootsPlotAbscissaBeginField, GridBagConstraints(2, 1, 1, 1, 1.0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 5), 0, 0))
         plotRootsPlotPanel.add(plotRootsPlotAbscissaToLabel, GridBagConstraints(3, 1, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.NONE, Insets(0, 0, 5, 5), 0, 0))
 
-        plotRootsPlotAbscissaEndField.document.addDocumentListener(documentAdapter {
+        plotRootsPlotAbscissaEndField.document.addDocumentListener(documentAdapter { manualChange {
             val value = plotRootsPlotAbscissaEndField.text.toDoubleOrNull()
 
             if (value != null) {
@@ -293,7 +295,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
             } else {
                 INVALID_VALUE_COLOR
             }
-        })
+        } })
         plotRootsPlotPanel.add(plotRootsPlotAbscissaEndField, GridBagConstraints(4, 1, 1, 1, 1.0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 5), 0, 0))
 
         plotRootsPlotAbscissaSwapButton.addActionListener {
@@ -311,7 +313,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         plotRootsPlotPanel.add(plotRootsPlotOrdinateLabel, GridBagConstraints(0, 2, 1, 1, .0, .0, GridBagConstraints.EAST, GridBagConstraints.NONE, Insets(0, 0, 5, 5), 0, 0))
         plotRootsPlotPanel.add(plotRootsPlotOrdinateFromLabel, GridBagConstraints(1, 2, 1, 1, .0, .0, GridBagConstraints.BASELINE, GridBagConstraints.NONE, Insets(0, 0, 5, 5), 0, 0))
 
-        plotRootsPlotOrdinateBeginField.document.addDocumentListener(documentAdapter {
+        plotRootsPlotOrdinateBeginField.document.addDocumentListener(documentAdapter { manualChange {
             val value = plotRootsPlotOrdinateBeginField.text.toDoubleOrNull()
 
             if (value != null) {
@@ -325,11 +327,11 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
             } else {
                 INVALID_VALUE_COLOR
             }
-        })
+        } })
         plotRootsPlotPanel.add(plotRootsPlotOrdinateBeginField, GridBagConstraints(2, 2, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 5), 0, 0))
         plotRootsPlotPanel.add(plotRootsPlotOrdinateToLabel, GridBagConstraints(3, 2, 1, 1, .0, .0, GridBagConstraints.BASELINE, GridBagConstraints.NONE, Insets(0, 0, 5, 5), 0, 0))
 
-        plotRootsPlotOrdinateEndField.document.addDocumentListener(documentAdapter {
+        plotRootsPlotOrdinateEndField.document.addDocumentListener(documentAdapter { manualChange {
             val value = plotRootsPlotOrdinateEndField.text.toDoubleOrNull()
 
             if (value != null) {
@@ -343,7 +345,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
             } else {
                 INVALID_VALUE_COLOR
             }
-        })
+        } })
         plotRootsPlotPanel.add(plotRootsPlotOrdinateEndField, GridBagConstraints(4, 2, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 5), 0, 0))
 
         plotRootsPlotOrdinateSwapButton.addActionListener {
@@ -432,14 +434,15 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
 
         minimumSize = size
 
-        onStoreChange(store)
+        thread { onStoreChange(store) }
         store.onChange.listeners.addWithoutValue(this::onStoreChange)
     }
 
     private fun onStoreChange(storeHolder: ReactiveHolder<Store>) {
         val store = storeHolder.get()
 
-        SwingUtilities.invokeLater {
+        SwingUtilities.invokeAndWait {
+            onStoreChangeRun = true
 
             // mode
             modeTabbedPane.selectedIndex = store.mode.ordinal
@@ -551,6 +554,16 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
             plotRootsPlotModeButtons[store.plotMode]?.isSelected = true
 
             println("Store changed: $store")
+        }
+
+        SwingUtilities.invokeLater {
+            onStoreChangeRun = false
+        }
+    }
+
+    private inline fun manualChange(block: () -> Unit) {
+        if (!onStoreChangeRun) {
+            block()
         }
     }
 

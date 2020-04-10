@@ -8,6 +8,7 @@ import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.Insets
 import javax.swing.*
+import kotlin.concurrent.thread
 
 class SliceWindow(store: ReactiveHolder<Store>): JFrame("Slice") {
 
@@ -15,6 +16,8 @@ class SliceWindow(store: ReactiveHolder<Store>): JFrame("Slice") {
     private val _contentScrollPane = JScrollPane(_contentPane)
     private val placeholderLabel = JLabel("There isn't variables")
     private val variablesComponents = mutableMapOf<String, VariableComponents>()
+
+    private var onStoreChangeRun = false
 
     init {
         _contentPane.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
@@ -26,16 +29,17 @@ class SliceWindow(store: ReactiveHolder<Store>): JFrame("Slice") {
         minimumSize = size
 
         addPlaceholder()
-        onStoreChange(store.get(), store)
+        thread { onStoreChange(store.get(), store) }
         store.onChange.listeners.add(this::onStoreChange)
     }
 
     private fun onStoreChange(oldStore: Store, storeHolder: ReactiveHolder<Store>) {
         val store = storeHolder.get()
 
-        SwingUtilities.invokeLater {
-            val vars = store.variables
+        SwingUtilities.invokeAndWait {
+            onStoreChangeRun = true
 
+            val vars = store.variables
             if (vars != oldStore.variables) {
                 variablesComponents.filterKeys { v -> !vars.contains(v) }.forEach { (v, c) ->
                     variablesComponents.remove(v, c)
@@ -44,7 +48,7 @@ class SliceWindow(store: ReactiveHolder<Store>): JFrame("Slice") {
 
                 if (vars.isEmpty()) {
                     addPlaceholder()
-                    return@invokeLater
+                    return@invokeAndWait
                 }
 
                 removePlaceholder()
@@ -71,13 +75,17 @@ class SliceWindow(store: ReactiveHolder<Store>): JFrame("Slice") {
                 }
             }
         }
+
+        SwingUtilities.invokeLater {
+            onStoreChangeRun = false
+        }
     }
 
     private fun makeVariableComponents(variable: String, storeHolder: ReactiveHolder<Store>): VariableComponents {
         val label = JLabel(variable)
 
         val slider = JSlider(0, 1000)
-        slider.addChangeListener {
+        slider.addChangeListener { manualChange {
             val store = storeHolder.get()
 
             if (store.begin != null && store.end != null) {
@@ -89,10 +97,10 @@ class SliceWindow(store: ReactiveHolder<Store>): JFrame("Slice") {
                     }
                 }
             }
-        }
+        } }
 
         val field = JTextField(8)
-        field.document.addDocumentListener(documentAdapter {
+        field.document.addDocumentListener(documentAdapter { manualChange {
             val offset = field.text.toDoubleOrNull()
 
             if (offset != null) {
@@ -100,7 +108,7 @@ class SliceWindow(store: ReactiveHolder<Store>): JFrame("Slice") {
                     store.copy(plotSlice = store.plotSlice + mapOf(variable to offset))
                 }
             }
-        })
+        } })
 
         return VariableComponents(label, slider, field)
     }
@@ -140,6 +148,12 @@ class SliceWindow(store: ReactiveHolder<Store>): JFrame("Slice") {
 
     private fun calcOffsetToSlider(begin: Double, end: Double, offset: Double): Int =
             ((offset - begin) / (end - begin) * 1000).toInt()
+
+    private inline fun manualChange(block: () -> Unit) {
+        if (!onStoreChangeRun) {
+            block()
+        }
+    }
 
     private data class VariableComponents(
             val label: JLabel,

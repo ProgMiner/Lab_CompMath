@@ -141,7 +141,11 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
             while (currentGridLineX < width) {
                 if (currentRealGridLineX != 0) {
                     graphics.color = foreground
-                    graphics.drawString(currentRealGridLineX.toString(), currentGridLineX.toInt(), (centerY - 5).toInt())
+                    graphics.drawString(
+                            currentRealGridLineX.toString(),
+                            (currentGridLineX + 2).toInt(),
+                            min(max((centerY - 5).toInt(), graphics.fontMetrics.height + 2), height - 5)
+                    )
                 }
 
                 currentGridLineX += gridStepX
@@ -154,7 +158,11 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
             while (currentGridLineY < height + gridStepY) {
                 if (currentRealGridLineY != 0) {
                     graphics.color = foreground
-                    graphics.drawString(currentRealGridLineY.toString(), (centerX + 3).toInt(), (currentGridLineY - 2).toInt())
+                    graphics.drawString(
+                            currentRealGridLineY.toString(),
+                            min(max((centerX + 3).toInt(), 5), width - graphics.fontMetrics.stringWidth(currentRealGridLineY.toString()) - 2),
+                            (currentGridLineY - 2).toInt()
+                    )
                 }
 
                 currentGridLineY += gridStepY

@@ -85,12 +85,13 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
         val centerY = -store.plotOrdinateEnd * zoomY
 
         // Grid
+        // TODO make steps k * 2, k * 5
         val realGridStep = ceil(abs(min(intervalX, intervalY) / 20.0)).toInt()
 
         if (realGridStep != 0) {
             val gridStepX = realGridStep * zoomX * signX
+
             var currentGridLineX = centerX - (centerX / gridStepX).toInt() * gridStepX
-            var currentRealGridLineX = (store.plotAbscissaBegin + currentGridLineX / zoomX).toInt()
             while (currentGridLineX < width) {
 
                 graphics.color = GRID_COLOR
@@ -99,18 +100,12 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
                 graphics.color = foreground
                 graphics.drawLine(currentGridLineX.toInt(), (centerY - 3).toInt(), currentGridLineX.toInt(), (centerY + 3).toInt())
 
-                if (currentRealGridLineX != 0) {
-                    graphics.drawString(currentRealGridLineX.toString(), currentGridLineX.toInt(), (centerY - 5).toInt())
-                }
-
                 currentGridLineX += gridStepX
-                currentRealGridLineX += realGridStep * signX
             }
 
             val gridStepY = realGridStep * zoomY * signY
             var currentGridLineY = centerY - (centerY / gridStepY).toInt() * gridStepY
-            var currentRealGridLineY = (store.plotOrdinateEnd + currentGridLineY / zoomY).toInt()
-            while (currentGridLineY < width) {
+            while (currentGridLineY < height) {
 
                 graphics.color = GRID_COLOR
                 graphics.drawLine(0, currentGridLineY.toInt(), width, currentGridLineY.toInt())
@@ -118,12 +113,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
                 graphics.color = foreground
                 graphics.drawLine((centerX - 3).toInt(), currentGridLineY.toInt(), (centerX + 3).toInt(), currentGridLineY.toInt())
 
-                if (currentRealGridLineY != 0) {
-                    graphics.drawString(currentRealGridLineY.toString(), (centerX + 3).toInt(), (currentGridLineY - 2).toInt())
-                }
-
                 currentGridLineY += gridStepY
-                currentRealGridLineY += realGridStep * signY
             }
         }
 
@@ -140,6 +130,36 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
 
             graphics.color = Color(0x1F000000 or (INTERVAL_COLOR.rgb and 0xFFFFFF), true)
             graphics.fillRect((centerX + store.begin * zoomX * signX).toInt(), 0, ((store.end - store.begin) * zoomX * signX).toInt(), height)
+        }
+
+        // Grid text
+        if (realGridStep != 0) {
+            val gridStepX = realGridStep * zoomX * signX
+
+            var currentRealGridLineX = -(centerX / gridStepX).toInt() * realGridStep
+            var currentGridLineX = centerX + currentRealGridLineX / realGridStep * gridStepX
+            while (currentGridLineX < width) {
+                if (currentRealGridLineX != 0) {
+                    graphics.color = foreground
+                    graphics.drawString(currentRealGridLineX.toString(), currentGridLineX.toInt(), (centerY - 5).toInt())
+                }
+
+                currentGridLineX += gridStepX
+                currentRealGridLineX += realGridStep
+            }
+
+            val gridStepY = realGridStep * zoomY * signY
+            var currentRealGridLineY = (centerY / gridStepY).toInt() * realGridStep
+            var currentGridLineY = centerY - currentRealGridLineY / realGridStep * gridStepY
+            while (currentGridLineY < height) {
+                if (currentRealGridLineY != 0) {
+                    graphics.color = foreground
+                    graphics.drawString(currentRealGridLineY.toString(), (centerX + 3).toInt(), (currentGridLineY - 2).toInt())
+                }
+
+                currentGridLineY += gridStepY
+                currentRealGridLineY -= realGridStep
+            }
         }
 
         // Axes
@@ -330,17 +350,37 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
         val amount: Double = e.wheelRotation.toDouble() * 1.68
 
         store.mutateIfOther { store ->
-            val zoomX = amount / 2
-            val zoomY = amount / 2
+            val (width, height) = sizeWithoutBorder.run { width to height }
+
+            val intervalX = store.plotAbscissaEnd - store.plotAbscissaBegin
+            val intervalY = store.plotOrdinateEnd - store.plotOrdinateBegin
+
+            val zoomX = intervalX / width
+            val zoomY = intervalY / height
+            val amountX = amount * zoomX / 2
+            val amountY = amount * zoomY / 2
 
             // TODO mouse position priority
 
-            store.copy(
-                    plotAbscissaBegin = store.plotAbscissaBegin - zoomX,
-                    plotAbscissaEnd = store.plotAbscissaEnd + zoomX,
-                    plotOrdinateBegin = store.plotOrdinateBegin - zoomY,
-                    plotOrdinateEnd = store.plotOrdinateEnd + zoomY
-            )
+            return@mutateIfOther if (amountX > amountY) {
+                val amountXByY = amountY * zoomX / zoomY
+
+                store.copy(
+                        plotAbscissaBegin = store.plotAbscissaBegin - amountXByY,
+                        plotAbscissaEnd = store.plotAbscissaEnd + amountXByY,
+                        plotOrdinateBegin = store.plotOrdinateBegin - amountY,
+                        plotOrdinateEnd = store.plotOrdinateEnd + amountY
+                )
+            } else {
+                val amountYByX = amountX * zoomY / zoomX
+
+                store.copy(
+                        plotAbscissaBegin = store.plotAbscissaBegin - amountX,
+                        plotAbscissaEnd = store.plotAbscissaEnd + amountX,
+                        plotOrdinateBegin = store.plotOrdinateBegin - amountYByX,
+                        plotOrdinateEnd = store.plotOrdinateEnd + amountYByX
+                )
+            }
         }
     }
 

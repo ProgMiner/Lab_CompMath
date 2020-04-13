@@ -296,7 +296,49 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
             }
         }
 
-        // TODO roots
+        // Roots
+
+        if (
+                store.begin != null && store.end != null &&
+                store.plotAbscissaVariable != null && !store.roots.isNullOrEmpty()
+        ) {
+            graphics.color = AXES_COLOR
+
+            if (graphics is Graphics2D && store.plotMode == Store.PlotMode.FUNCTIONS) {
+                graphics.stroke = BasicStroke(4f)
+            }
+
+            for ((root, _) in store.roots) {
+                val thisSlice = root.all { (variable, value) ->
+                    if (variable == store.plotAbscissaVariable) {
+                        return@all true
+                    }
+
+                    val sliceValue = store.plotSlice.getOrDefault(variable, store.begin + (store.end - store.begin) / 2)
+                    return@all abs(sliceValue - value) <= abs(store.end - store.begin) / 1000
+                }
+
+                if (!thisSlice) {
+                    continue
+                }
+
+                val x = (centerX + root.getValue(store.plotAbscissaVariable) * zoomX).toInt()
+
+                when (store.plotMode) {
+                    Store.PlotMode.FUNCTIONS -> {
+                        graphics.drawLine(x, centerY.toInt(), x, centerY.toInt())
+                    }
+
+                    Store.PlotMode.EQUATIONS -> {
+                        graphics.drawLine(x, 0, x, height)
+                    }
+                }
+            }
+
+            if (graphics is Graphics2D && store.plotMode == Store.PlotMode.FUNCTIONS) {
+                graphics.stroke = BasicStroke(1f)
+            }
+        }
 
         buffer = newBuffer
     }

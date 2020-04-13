@@ -296,6 +296,8 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
             }
         }
 
+        // TODO roots
+
         buffer = newBuffer
     }
 

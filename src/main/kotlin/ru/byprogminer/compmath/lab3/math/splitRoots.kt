@@ -35,7 +35,7 @@ private fun Equation.splitRoots(interval: Interval, variables: Set<String>, valu
             previousValue = currentValue
         }
     } else {
-        TODO("split values on equations with many variables")
+        throw UnsupportedOperationException("roots splitting for functions of several variables is not supported")
     }
 
     return result.build()

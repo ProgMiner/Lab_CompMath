@@ -84,35 +84,25 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
 
         // Grid
 
-        val realGridStepX = roundGridStep(intervalX / 10.0)
-        if (realGridStepX != .0) {
-            val gridStepX = realGridStepX * zoomX * signX
+        val realGridStep = max(roundGridStep(intervalX / 10.0), roundGridStep(intervalY / 10.0))
+        if (realGridStep != .0) {
 
+            val gridStepX = realGridStep * zoomX * signX
             var currentGridLineX = centerX - (centerX / gridStepX).toInt() * gridStepX
             while (currentGridLineX < width) {
 
                 graphics.color = GRID_COLOR
                 graphics.drawLine(currentGridLineX.toInt(), 0, currentGridLineX.toInt(), height)
 
-                graphics.color = foreground
-                graphics.drawLine(currentGridLineX.toInt(), (centerY - 3).toInt(), currentGridLineX.toInt(), (centerY + 3).toInt())
-
                 currentGridLineX += gridStepX
             }
-        }
 
-        val realGridStepY = roundGridStep(intervalY / 10.0)
-        if (realGridStepY != .0) {
-            val gridStepY = realGridStepY * zoomY * signY
-
+            val gridStepY = realGridStep * zoomY * signY
             var currentGridLineY = centerY - (centerY / gridStepY).toInt() * gridStepY
             while (currentGridLineY < height) {
 
                 graphics.color = GRID_COLOR
                 graphics.drawLine(0, currentGridLineY.toInt(), width, currentGridLineY.toInt())
-
-                graphics.color = foreground
-                graphics.drawLine((centerX - 3).toInt(), currentGridLineY.toInt(), (centerX + 3).toInt(), currentGridLineY.toInt())
 
                 currentGridLineY += gridStepY
             }
@@ -134,14 +124,17 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
         }
 
         // Grid text
-        if (realGridStepX != .0) {
-            val gridStepX = realGridStepX * zoomX * signX
+        if (realGridStep != .0) {
 
-            var currentRealGridLineX = -(centerX / gridStepX + 1).toInt() * realGridStepX * signX
-            var currentGridLineX = centerX + currentRealGridLineX / realGridStepX * gridStepX * signX
+            val gridStepX = realGridStep * zoomX * signX
+            var currentRealGridLineX = -(centerX / gridStepX + 1).toInt() * realGridStep * signX
+            var currentGridLineX = centerX + currentRealGridLineX / realGridStep * gridStepX * signX
             while (currentGridLineX < width) {
                 if (abs(currentGridLineX - centerX) > 1) {
                     graphics.color = foreground
+
+                    val y = min(max(centerY, .0), height.toDouble())
+                    graphics.drawLine(currentGridLineX.toInt(), (y - 3).toInt(), currentGridLineX.toInt(), (y + 3).toInt())
 
                     graphics.drawString(
                             currentRealGridLineX.toPlainString(),
@@ -151,19 +144,18 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
                 }
 
                 currentGridLineX += gridStepX
-                currentRealGridLineX += realGridStepX * signX
+                currentRealGridLineX += realGridStep * signX
             }
-        }
 
-
-        if (realGridStepY != .0) {
-            val gridStepY = realGridStepY * zoomY * signY
-
-            var currentRealGridLineY = -(centerY / gridStepY).toInt() * realGridStepY * signY
-            var currentGridLineY = centerY + currentRealGridLineY / realGridStepY * gridStepY * signY
+            val gridStepY = realGridStep * zoomY * signY
+            var currentRealGridLineY = -(centerY / gridStepY).toInt() * realGridStep * signY
+            var currentGridLineY = centerY + currentRealGridLineY / realGridStep * gridStepY * signY
             while (currentGridLineY < height + gridStepY) {
                 if (abs(currentGridLineY - centerY) > 1) {
                     graphics.color = foreground
+
+                    val x = min(max(centerX, .0), width.toDouble())
+                    graphics.drawLine((x - 3).toInt(), currentGridLineY.toInt(), (x + 3).toInt(), currentGridLineY.toInt())
 
                     val str = currentRealGridLineY.toPlainString()
                     graphics.drawString(str,
@@ -172,7 +164,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
                 }
 
                 currentGridLineY += gridStepY
-                currentRealGridLineY += realGridStepY * signY
+                currentRealGridLineY += realGridStep * signY
             }
         }
 
@@ -386,15 +378,13 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
             val intervalX = store.plotAbscissaEnd - store.plotAbscissaBegin
             val intervalY = store.plotOrdinateEnd - store.plotOrdinateBegin
 
-            val zoomX = intervalX / width
-            val zoomY = intervalY / height
-            val amountX = amount * zoomX / 2
-            val amountY = amount * zoomY / 2
+            val amountX = amount * intervalX / width / 2
+            val amountY = amount * intervalY / height / 2
 
             // TODO mouse position priority
 
             return@mutateIfOther if (amountX > amountY) {
-                val amountXByY = amountY * zoomX / zoomY
+                val amountXByY = amountY * intervalX / intervalY
 
                 store.copy(
                         plotAbscissaBegin = store.plotAbscissaBegin - amountXByY,
@@ -403,7 +393,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
                         plotOrdinateEnd = store.plotOrdinateEnd + amountY
                 )
             } else {
-                val amountYByX = amountX * zoomY / zoomX
+                val amountYByX = amountX * intervalY / intervalX
 
                 store.copy(
                         plotAbscissaBegin = store.plotAbscissaBegin - amountX,

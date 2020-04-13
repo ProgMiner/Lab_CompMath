@@ -11,6 +11,7 @@ import ru.byprogminer.compmath.lab3.math.SimpleIterationsMethod
 import ru.byprogminer.compmath.lab3.parser.parse
 import ru.byprogminer.compmath.lab3.util.ReactiveHolder
 import ru.byprogminer.compmath.lab3.util.reactiveHolder
+import ru.byprogminer.compmath.lab3.util.toPlainString
 import java.awt.*
 import javax.swing.*
 import kotlin.concurrent.thread
@@ -454,7 +455,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
             }
 
             if (precisionIntervalIntervalStartField.text.toDoubleOrNull() != store.begin) {
-                precisionIntervalIntervalStartField.text = store.begin?.toString() ?: ""
+                precisionIntervalIntervalStartField.text = store.begin?.toPlainString() ?: ""
             }
 
             // end
@@ -464,7 +465,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
             }
 
             if (precisionIntervalIntervalEndField.text.toDoubleOrNull() != store.end) {
-                precisionIntervalIntervalEndField.text = store.end?.toString() ?: ""
+                precisionIntervalIntervalEndField.text = store.end?.toPlainString() ?: ""
             }
 
             // step
@@ -484,7 +485,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
             }
 
             if (precisionIntervalPrecisionPrecisionField.text.toDoubleOrNull() != store.precision) {
-                precisionIntervalPrecisionPrecisionField.text = store.precision?.toString() ?: ""
+                precisionIntervalPrecisionPrecisionField.text = store.precision?.toPlainString() ?: ""
             }
 
             // iterations
@@ -535,22 +536,22 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
 
             // plotAbscissaBegin
             if (plotRootsPlotAbscissaBeginField.text.toDoubleOrNull() != store.plotAbscissaBegin) {
-                plotRootsPlotAbscissaBeginField.text = store.plotAbscissaBegin.toString()
+                plotRootsPlotAbscissaBeginField.text = store.plotAbscissaBegin.toPlainString()
             }
 
             // plotAbscissaEnd
             if (plotRootsPlotAbscissaEndField.text.toDoubleOrNull() != store.plotAbscissaEnd) {
-                plotRootsPlotAbscissaEndField.text = store.plotAbscissaEnd.toString()
+                plotRootsPlotAbscissaEndField.text = store.plotAbscissaEnd.toPlainString()
             }
 
             // plotOrdinateBegin
             if (plotRootsPlotOrdinateBeginField.text.toDoubleOrNull() != store.plotOrdinateBegin) {
-                plotRootsPlotOrdinateBeginField.text = store.plotOrdinateBegin.toString()
+                plotRootsPlotOrdinateBeginField.text = store.plotOrdinateBegin.toPlainString()
             }
 
             // plotOrdinateEnd
             if (plotRootsPlotOrdinateEndField.text.toDoubleOrNull() != store.plotOrdinateEnd) {
-                plotRootsPlotOrdinateEndField.text = store.plotOrdinateEnd.toString()
+                plotRootsPlotOrdinateEndField.text = store.plotOrdinateEnd.toPlainString()
             }
 
             // plotMode

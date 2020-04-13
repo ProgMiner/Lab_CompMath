@@ -3,6 +3,7 @@ package ru.byprogminer.compmath.lab3.gui
 import ru.byprogminer.compmath.lab3.Store
 import ru.byprogminer.compmath.lab3.gui.util.documentAdapter
 import ru.byprogminer.compmath.lab3.util.ReactiveHolder
+import ru.byprogminer.compmath.lab3.util.toPlainString
 import java.awt.Dimension
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
@@ -71,7 +72,7 @@ class SliceWindow(store: ReactiveHolder<Store>): JFrame("Slice") {
                 }
 
                 if (c.field.text.toDoubleOrNull() != store.plotSlice.getValue(v)) {
-                    c.field.text = store.plotSlice.getValue(v).toString()
+                    c.field.text = store.plotSlice.getValue(v).toPlainString()
                 }
             }
         }

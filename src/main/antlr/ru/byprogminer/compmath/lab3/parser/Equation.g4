@@ -7,7 +7,7 @@ grammar Equation;
 // Tokens
 
 VARIABLE: [a-z];
-NUMBER: '-'?[0-9]+('.'[0-9]+)?;
+NUMBER: [0-9]+('.'[0-9]+)?;
 WHITESPACE: [ \t\n\r]+ -> skip;
 
 // Rules

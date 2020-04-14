@@ -3,7 +3,7 @@ package ru.byprogminer.compmath.lab3.util
 import java.math.BigDecimal
 import java.math.RoundingMode
 
-fun Double.toPlainString(scale: Int = 15): String {
+fun Double.toPlainString(scale: Int = 12): String {
     if (toLong().toDouble() == this) {
         return toLong().toString()
     }

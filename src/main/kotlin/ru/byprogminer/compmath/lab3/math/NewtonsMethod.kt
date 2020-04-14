@@ -52,7 +52,10 @@ object NewtonsMethod: EquationSystemMethod {
             throw IllegalArgumentException("system doesn't convergence")
         }
 
-        val roots = system.calculateRoots().mapIndexed { v, x -> variables[v] to x.toDouble() }.toMap()
+        val roots = system.calculateRoots()
+                .mapIndexed { v, x -> variables[v] to x.toDouble() }
+                .map { (v, x) -> v to (values.getValue(v) + x) }.toMap()
+
         val end = roots.all { (v, x) -> abs(x - values.getValue(v)) <= precision.precision }
 
         if (end || i >= precision.iterations) {

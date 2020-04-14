@@ -64,6 +64,8 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
     private val modeSystemEquationsTableModel = EquationsTableModel(store)
     private val modeSystemEquationsTable = JTable(modeSystemEquationsTableModel)
     private val modeSystemEquationsPane = JScrollPane(modeSystemEquationsTable)
+    private val modeSystemApproximationWindow = ApproximationWindow(store)
+    private val modeSystemApproximationButton = JButton("Start approximation")
     private val modeSystemMethodPanel = JPanel(GridBagLayout())
     private val modeSystemMethodButtonGroup = ButtonGroup()
     private val modeSystemMethodButtons = mapOf(
@@ -236,6 +238,12 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         modeSystemEquationsPane.preferredSize = Dimension(150, 300)
         modeSystemPanel.add(modeSystemEquationsPane, GridBagConstraints(0, 1, 3, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 5, 0), 0, 0))
 
+        modeSystemApproximationWindow.setLocationRelativeTo(this)
+        modeSystemApproximationButton.addActionListener {
+            modeSystemApproximationWindow.isVisible = !modeSystemApproximationWindow.isVisible
+        }
+        modeSystemPanel.add(modeSystemApproximationButton, GridBagConstraints(0, 2, 3, 1, 1.0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 0), 0, 0))
+
         modeSystemMethodButtons.toList().forEachIndexed { i, (_, button) ->
             modeSystemMethodPanel.add(button, GridBagConstraints(0, i, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, if (i == modeEquationMethodButtons.size - 1) 0 else 5, 0), 0, 0))
         }
@@ -243,7 +251,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
                 BorderFactory.createTitledBorder("Method"),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)
         )
-        modeSystemPanel.add(modeSystemMethodPanel, GridBagConstraints(0, 2, 3, 1, .0, .0, GridBagConstraints.SOUTH, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 0), 0, 0))
+        modeSystemPanel.add(modeSystemMethodPanel, GridBagConstraints(0, 3, 3, 1, .0, .0, GridBagConstraints.SOUTH, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 0), 0, 0))
         modeSystemPanel.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
         modeTabbedPane.add(modeSystemPanel, "Equations system")
         modeTabbedPane.addChangeListener { manualChange {
@@ -401,11 +409,10 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         }
         plotRootsPlotButtonsPanel.add(plotRootsPlotButtonsFitButton, GridBagConstraints(0, 0, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 0), 0, 0))
 
+        plotRootsPlotButtonsSliceWindow.setLocationRelativeTo(this)
         plotRootsPlotButtonsSliceButton.addActionListener {
             plotRootsPlotButtonsSliceWindow.isVisible = !plotRootsPlotButtonsSliceWindow.isVisible
         }
-
-        plotRootsPlotButtonsSliceWindow.setLocationRelativeTo(this)
         plotRootsPlotButtonsPanel.add(plotRootsPlotButtonsSliceButton, GridBagConstraints(0, 1, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 0), 0, 0))
         plotRootsPlotPanel.add(plotRootsPlotButtonsPanel, GridBagConstraints(6, 1, 1, 3, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 0, 0), 0, 0))
         plotRootsPlotPanel.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
@@ -574,6 +581,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
     override fun dispose() {
         super.dispose()
 
+        modeSystemApproximationWindow.dispose()
         plotRootsPlotButtonsSliceWindow.dispose()
     }
 }

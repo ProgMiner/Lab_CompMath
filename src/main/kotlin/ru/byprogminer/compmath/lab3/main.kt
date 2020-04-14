@@ -66,11 +66,11 @@ fun main() {
                 st.begin != oldStore.begin || st.end != oldStore.end || st.cuts != oldStore.cuts ||
                 st.precision != oldStore.precision || st.iterations != oldStore.iterations ||
                 st.equation != oldStore.equation || st.method != oldStore.method ||
-                st.equations != oldStore.equations || st.systemMethod != oldStore.systemMethod
+                st.equations != oldStore.equations || st.systemMethod != oldStore.systemMethod ||
+                st.startValues != oldStore.startValues
         ) {
-            val startValues = st.startValues + st.equations
-                    .map { (eq, _) -> eq }.variables
-                    .map { v -> v to .0 }
+            val startValues = st.equations.map { (eq, _) -> eq }.variables
+                    .map { v -> v to .0 }.toMap() + st.startValues
 
             storeHolder.mutateIfOther { s -> s.copy(
                     startValues = startValues,

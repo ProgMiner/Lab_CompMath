@@ -2,13 +2,14 @@ package ru.byprogminer.compmath.lab3.gui
 
 import ru.byprogminer.compmath.lab3.Store
 import ru.byprogminer.compmath.lab3.util.ReactiveHolder
+import ru.byprogminer.compmath.lab3.util.toPlainString
 import javax.swing.SwingUtilities
 import javax.swing.table.AbstractTableModel
 
 class RootsTableModel(storeHolder: ReactiveHolder<Store>): AbstractTableModel() {
 
     private var columns = listOf("Iterations")
-    private var rows = emptyList<List<Number>>()
+    private var rows = emptyList<List<String>>()
 
     init {
         storeHolder.onChange.listeners.add { oldStore ->
@@ -26,7 +27,9 @@ class RootsTableModel(storeHolder: ReactiveHolder<Store>): AbstractTableModel() 
 
             if (store.roots != oldStore.roots) {
                 val rows1 = (store.roots ?: emptySet())
-                        .map { values -> columns.map { col -> (values.first[col] ?: values.second) as Number } }
+                        .map { values -> columns.map { col ->
+                            (values.first[col]?.toPlainString(400) ?: values.second.toString())
+                        } }
 
                 if (rows1 != this.rows) {
                     SwingUtilities.invokeLater {
@@ -43,9 +46,9 @@ class RootsTableModel(storeHolder: ReactiveHolder<Store>): AbstractTableModel() 
 
     override fun getColumnCount() = columns.size
     override fun getColumnName(columnIndex: Int) = columns[columnIndex]
-    override fun getColumnClass(columnIndex: Int) = Number::class.java
+    override fun getColumnClass(columnIndex: Int) = String::class.java
 
     override fun getValueAt(rowIndex: Int, columnIndex: Int) = rows.getOrNull(rowIndex)?.getOrNull(columnIndex)
     override fun setValueAt(aValue: Any?, rowIndex: Int, columnIndex: Int) {}
-    override fun isCellEditable(rowIndex: Int, columnIndex: Int) = false
+    override fun isCellEditable(rowIndex: Int, columnIndex: Int) = columnIndex != columns.lastIndex
 }

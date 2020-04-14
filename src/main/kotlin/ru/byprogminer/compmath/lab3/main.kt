@@ -3,10 +3,7 @@ package ru.byprogminer.compmath.lab3
 import ru.byprogminer.compmath.lab3.equation.InvalidEquation
 import ru.byprogminer.compmath.lab3.gui.MainWindow
 import ru.byprogminer.compmath.lab3.gui.util.randomColor
-import ru.byprogminer.compmath.lab3.math.BisectionMethod
-import ru.byprogminer.compmath.lab3.math.Interval
-import ru.byprogminer.compmath.lab3.math.NewtonsMethod
-import ru.byprogminer.compmath.lab3.math.Precision
+import ru.byprogminer.compmath.lab3.math.*
 import ru.byprogminer.compmath.lab3.util.EventManager
 import ru.byprogminer.compmath.lab3.util.reactiveHolder
 import java.awt.event.WindowAdapter
@@ -32,6 +29,7 @@ fun main() {
             randomColor(),
             BisectionMethod,
 
+            emptyMap(),
             emptyList(),
             NewtonsMethod,
 
@@ -49,19 +47,17 @@ fun main() {
     store.onChange.listeners.add { oldStore, storeHolder ->
         val st = storeHolder.get()
 
-        run {
-            if (st.mode != oldStore.mode || st.equation != oldStore.equation || st.equations != oldStore.equations) {
-                val vars = st.variables
+        if (st.mode != oldStore.mode || st.equation != oldStore.equation || st.equations != oldStore.equations) {
+            val vars = st.variables
 
-                storeHolder.mutateIfOther { store ->
-                    store.copy(
-                            plotSlice = vars.map { v -> v to .0 }.toMap() + store.plotSlice,
-                            plotAbscissaVariable = when (store.plotAbscissaVariable) {
-                                in vars -> store.plotAbscissaVariable
-                                else -> vars.min()
-                            }
-                    )
-                }
+            storeHolder.mutateIfOther { store ->
+                store.copy(
+                        plotSlice = vars.map { v -> v to .0 }.toMap() + store.plotSlice,
+                        plotAbscissaVariable = when (store.plotAbscissaVariable) {
+                            in vars -> store.plotAbscissaVariable
+                            else -> vars.min()
+                        }
+                )
             }
         }
 
@@ -72,6 +68,15 @@ fun main() {
                 st.equation != oldStore.equation || st.method != oldStore.method ||
                 st.equations != oldStore.equations || st.systemMethod != oldStore.systemMethod
         ) {
+            val startValues = st.startValues + st.equations
+                    .map { (eq, _) -> eq }.variables
+                    .map { v -> v to .0 }
+
+            storeHolder.mutateIfOther { s -> s.copy(
+                    startValues = startValues,
+                    roots = null
+            ) }
+
             if (st.begin != null && st.end != null && st.cuts != null && st.precision != null && st.iterations != null) {
                 thread {
                     when (st.mode) {
@@ -93,13 +98,11 @@ fun main() {
 
                     storeHolder.mutateIfOther { s -> s.copy(roots = when (st.mode) {
                         Store.Mode.EQUATION -> st.method.solve(st.equation, interval, precision)
-                        Store.Mode.EQUATION_SYSTEM ->
-                            st.systemMethod.solve(st.equations.map { (eq, _) -> eq }, interval, precision)
+                        Store.Mode.EQUATION_SYSTEM -> st.systemMethod
+                                .solve(st.equations.map { (eq, _) -> eq }, startValues, precision)
                     }) }
                 }
             }
-
-            storeHolder.mutateIfOther { s -> s.copy(roots = null) }
         }
     }
 

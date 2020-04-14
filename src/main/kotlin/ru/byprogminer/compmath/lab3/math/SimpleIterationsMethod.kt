@@ -7,8 +7,6 @@ import kotlin.math.max
 
 object SimpleIterationsMethod: EquationMethod {
 
-    private const val EPSILON = 1e-5
-
     override fun solve(equation: Equation, interval: Interval, precision: Precision): Set<Pair<Map<String, Double>, Int>> {
         if (equation.variables.isEmpty()) {
             return emptySet()
@@ -48,10 +46,6 @@ object SimpleIterationsMethod: EquationMethod {
 
         return simpleIteration(equation, precision, variable, l, x, i + 1)
     }
-
-    private fun derivative(equation: Equation, variable: String, x: Double) =
-            (equation.evaluateAsFunction(mapOf(variable to x + EPSILON)) -
-                    equation.evaluateAsFunction(mapOf(variable to x))) / EPSILON
 
     override fun toString() = "Simple iterations method"
 }

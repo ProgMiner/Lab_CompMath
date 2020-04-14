@@ -20,6 +20,7 @@ data class Store(
         val equationColor: Color,
         val method: EquationMethod,
 
+        val startValues: Map<String, Double>,
         val equations: List<Pair<Equation, Color>>,
         val systemMethod: EquationSystemMethod,
 

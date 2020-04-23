@@ -15,6 +15,8 @@ class Fraction(numerator: BigInteger, denominator: BigInteger): Number(), Compar
 
         val ZERO = Fraction(BigInteger.ZERO, BigInteger.ONE)
         val ONE = Fraction(BigInteger.ONE, BigInteger.ONE)
+
+        // TODO NaN
     }
 
     private val numerator: BigInteger
@@ -50,7 +52,7 @@ class Fraction(numerator: BigInteger, denominator: BigInteger): Number(), Compar
         val (n, d) = if (denominator > BigInteger.ZERO) {
             init(numerator, denominator)
         } else {
-            init(BigInteger.ZERO - numerator, BigInteger.ZERO - denominator)
+            init(numerator.negate(), denominator.negate())
         }
 
         this.numerator = n
@@ -75,6 +77,16 @@ class Fraction(numerator: BigInteger, denominator: BigInteger): Number(), Compar
     operator fun div(that: Fraction) = Fraction(
             this.numerator * that.denominator,
             this.denominator * that.numerator
+    )
+
+    fun abs() = Fraction(
+            this.numerator.abs(),
+            this.denominator
+    )
+
+    fun negate() = Fraction(
+            this.numerator.negate(),
+            this.denominator
     )
 
     override fun compareTo(other: Fraction): Int {

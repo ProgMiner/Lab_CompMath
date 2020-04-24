@@ -40,7 +40,7 @@ fun main() {
     store.onChange.listeners.add { oldStore, storeHolder ->
         val st = storeHolder.get()
 
-        if (st.expression != oldStore.expression) {
+        if (st.function != oldStore.function) {
             val vars = st.variables
 
             storeHolder.mutateIfOther { store ->
@@ -53,15 +53,15 @@ fun main() {
             }
         }
 
-        if (st.expression != oldStore.expression || st.interpolationPoints != oldStore.interpolationPoints) {
+        if (st.function != oldStore.function || st.interpolationPoints != oldStore.interpolationPoints) {
             storeHolder.mutateIfOther { s -> s.copy(
-                    interpolationPolynomial = InvalidExpression(""),
+                    interpolation = InvalidExpression(""),
                     pointValues = null
             ) }
 
             thread {
                 try {
-                    if (st.expression.variables.size != 1) {
+                    if (st.function.variables.size != 1) {
                         return@thread
                     }
                 } catch (e: UnsupportedOperationException) {
@@ -71,12 +71,12 @@ fun main() {
                 val interpolation = TODO() as Expression
                 storeHolder.mutateIfOther { s ->
                     val pointValues = s.points.map { point ->
-                        point to (st.expression.evaluate(mapOf(st.expression.variables.first() to point)) to
-                                interpolation.evaluate(mapOf(st.expression.variables.first() to point)))
+                        point to (st.function.evaluate(mapOf(st.function.variables.first() to point)) to
+                                interpolation.evaluate(mapOf(st.function.variables.first() to point)))
                     }.toMap()
 
                     s.copy(
-                            interpolationPolynomial = interpolation,
+                            interpolation = interpolation,
                             pointValues = pointValues
                     )
                 }

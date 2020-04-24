@@ -205,8 +205,8 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
         // Plots
         if (store.plotAbscissaVariable != null) {
             val equations = listOf(
-                    store.expression to store.expressionColor,
-                    store.interpolationPolynomial to store.interpolationPolynomialColor
+                    store.function to store.functionColor,
+                    store.interpolation to store.interpolationColor
             ).filter { eq -> try {
                 eq.first.variables
                 return@filter true

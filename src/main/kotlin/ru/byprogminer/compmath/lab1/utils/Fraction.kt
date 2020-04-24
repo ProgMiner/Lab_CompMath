@@ -59,6 +59,11 @@ class Fraction(numerator: BigInteger, denominator: BigInteger): Number(), Compar
         this.denominator = d
     }
 
+    operator fun unaryMinus() = Fraction(
+            this.numerator.negate(),
+            this.denominator
+    )
+
     operator fun plus(that: Fraction) = Fraction(
             this.numerator * that.denominator + that.numerator * this.denominator,
             this.denominator * that.denominator
@@ -81,11 +86,6 @@ class Fraction(numerator: BigInteger, denominator: BigInteger): Number(), Compar
 
     fun abs() = Fraction(
             this.numerator.abs(),
-            this.denominator
-    )
-
-    fun negate() = Fraction(
-            this.numerator.negate(),
             this.denominator
     )
 

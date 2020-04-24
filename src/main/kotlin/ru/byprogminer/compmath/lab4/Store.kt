@@ -5,11 +5,11 @@ import ru.byprogminer.compmath.lab4.equation.Expression
 import java.awt.Color
 
 data class Store(
-        val expression: Expression,
-        val expressionColor: Color,
+        val function: Expression,
+        val functionColor: Color,
 
-        val interpolationPolynomial: Expression,
-        val interpolationPolynomialColor: Color,
+        val interpolation: Expression,
+        val interpolationColor: Color,
         val interpolationPoints: List<Fraction>,
 
         val points: List<Fraction>,
@@ -24,7 +24,7 @@ data class Store(
 
     val variables: Set<String>
         get() = try {
-            expression.variables
+            function.variables
         } catch (e: UnsupportedOperationException) {
             // Dummy Kotlin
             @Suppress("RemoveExplicitTypeArguments")

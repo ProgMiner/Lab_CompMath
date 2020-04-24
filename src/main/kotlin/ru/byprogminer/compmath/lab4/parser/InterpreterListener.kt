@@ -15,7 +15,7 @@ class InterpreterListener(private val values: Map<String, Fraction>): Expression
     }
 
     override fun exitExprUnaryMinus(ctx: ExpressionParser.ExprUnaryMinusContext) {
-        stack.push(stack.pop().negate())
+        stack.push(stack.pop().unaryMinus())
     }
 
     override fun exitExprPower(ctx: ExpressionParser.ExprPowerContext) {

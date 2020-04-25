@@ -2,6 +2,7 @@ package ru.byprogminer.compmath.lab4.gui
 
 import ru.byprogminer.compmath.lab4.Store
 import ru.byprogminer.compmath.lab4.util.ReactiveHolder
+import ru.byprogminer.compmath.lab4.util.toPlainString
 import javax.swing.SwingUtilities
 import javax.swing.table.AbstractTableModel
 
@@ -14,7 +15,7 @@ class InterpolationPointsTableModel(private val storeHolder: ReactiveHolder<Stor
             val store = storeHolder.get()
 
             if (store.interpolationPoints != oldStore.valuePoints) {
-                val rows = store.interpolationPoints.map(Double::toString)
+                val rows = store.interpolationPoints.map { it.toPlainString() }
 
                 if (rows != this.rows) {
                     SwingUtilities.invokeLater {

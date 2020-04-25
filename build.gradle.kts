@@ -30,6 +30,7 @@ repositories {
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions {
     jvmTarget = "1.8"
+    languageVersion = "1.3"
 }
 
 compileKotlin.dependsOn(tasks.generateGrammarSource)

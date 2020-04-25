@@ -2,6 +2,7 @@ package ru.byprogminer.compmath.lab4.gui
 
 import ru.byprogminer.compmath.lab4.Store
 import ru.byprogminer.compmath.lab4.util.ReactiveHolder
+import ru.byprogminer.compmath.lab4.util.toPlainString
 import javax.swing.SwingUtilities
 import javax.swing.table.AbstractTableModel
 
@@ -14,9 +15,9 @@ class ValuesTableModel(private val storeHolder: ReactiveHolder<Store>): Abstract
             val store = storeHolder.get()
 
             if (store.valuePoints != oldStore.valuePoints || store.values != oldStore.values) {
-                val rows = store.valuePoints.map { point -> listOf(point.toString(),
-                        store.values?.getValue(point)?.first?.toString() ?: "",
-                        store.values?.getValue(point)?.second?.toString() ?: "") }
+                val rows = store.valuePoints.map { point -> listOf(point.toPlainString(),
+                        store.values?.getValue(point)?.first?.toPlainString() ?: "",
+                        store.values?.getValue(point)?.second?.toPlainString() ?: "") }
 
                 if (rows != this.rows) {
                     SwingUtilities.invokeLater {

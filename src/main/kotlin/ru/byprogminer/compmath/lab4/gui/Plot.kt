@@ -232,7 +232,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
                             val actualPrevY = prevY
 
                             graphics.color = color
-                            // if (realResult.isFinite()) {
+                            if (realResult.isFinite()) {
                                 val y = (centerY + realResult * zoomY).toInt()
 
                                 if (actualPrevY != null) {
@@ -240,7 +240,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
                                 }
 
                                 prevY = y
-                            // }
+                            }
                         }
                     }
                 })

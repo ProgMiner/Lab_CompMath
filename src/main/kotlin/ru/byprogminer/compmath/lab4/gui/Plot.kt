@@ -5,6 +5,7 @@ import ru.byprogminer.compmath.lab4.util.ReactiveHolder
 import ru.byprogminer.compmath.lab4.util.toPlainString
 import java.awt.*
 import java.awt.event.*
+import java.awt.geom.Path2D
 import java.awt.image.BufferedImage
 import java.util.concurrent.CompletableFuture
 import javax.swing.JPanel
@@ -221,26 +222,33 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
             for ((equation, color) in equations) {
                 futures.add(CompletableFuture.runAsync {
                     var realX = store.plotAbscissaBegin ?: .0
+                    val path = Path2D.Double()
 
-                    var prevY: Int? = null
+                    var prevY: Double? = null
                     for (x in 0 until width) {
                         realX += realXStep
 
                         val realResult = equation.evaluate(mapOf(store.plotAbscissaVariable to realX))
+                        @Suppress("LiftReturnOrAssignment")
+                        if (realResult.isFinite()) {
+                            val y = centerY + realResult * zoomY
 
-                        synchronized(graphics) {
-                            val actualPrevY = prevY
-
-                            graphics.color = color
-                            if (realResult.isFinite()) {
-                                val y = (centerY + realResult * zoomY).toInt()
-
-                                if (actualPrevY != null) {
-                                    graphics.drawLine(x - 1, actualPrevY, x, y)
-                                }
-
-                                prevY = y
+                            if (prevY == null) {
+                                path.moveTo(x.toDouble(), y)
+                            } else {
+                                path.lineTo(x.toDouble(), y)
                             }
+
+                            prevY = y
+                        } else {
+                            prevY = null
+                        }
+                    }
+
+                    synchronized(graphics) {
+                        if (graphics is Graphics2D) {
+                            graphics.color = color
+                            graphics.draw(path)
                         }
                     }
                 })

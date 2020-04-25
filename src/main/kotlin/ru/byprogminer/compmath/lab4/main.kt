@@ -13,7 +13,7 @@ import java.awt.event.WindowEvent
 import javax.swing.SwingUtilities
 import kotlin.concurrent.thread
 
-const val APP_NAME = "Nonlinear equation solver"
+const val APP_NAME = "Lagrange method function interpolator"
 const val APP_VERSION = "1.0-SNAPSHOT"
 
 fun main() {
@@ -56,7 +56,7 @@ fun main() {
         if (st.function != oldStore.function || st.interpolationPoints != oldStore.interpolationPoints) {
             storeHolder.mutateIfOther { s -> s.copy(
                     interpolation = InvalidExpression(""),
-                    pointValues = null
+                    values = null
             ) }
 
             thread {
@@ -70,14 +70,14 @@ fun main() {
 
                 val interpolation = TODO() as Expression
                 storeHolder.mutateIfOther { s ->
-                    val pointValues = s.points.map { point ->
+                    val pointValues = s.valuePoints.map { point ->
                         point to (st.function.evaluate(mapOf(st.function.variables.first() to point)) to
                                 interpolation.evaluate(mapOf(st.function.variables.first() to point)))
                     }.toMap()
 
                     s.copy(
                             interpolation = interpolation,
-                            pointValues = pointValues
+                            values = pointValues
                     )
                 }
             }

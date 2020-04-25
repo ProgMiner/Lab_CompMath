@@ -1,11 +1,12 @@
 package ru.byprogminer.compmath.lab4.gui
 
+import ru.byprogminer.compmath.lab1.utils.Fraction
 import ru.byprogminer.compmath.lab4.Store
 import ru.byprogminer.compmath.lab4.util.ReactiveHolder
 import javax.swing.SwingUtilities
 import javax.swing.table.AbstractTableModel
 
-class ValuesTableModel(storeHolder: ReactiveHolder<Store>): AbstractTableModel() {
+class ValuesTableModel(private val storeHolder: ReactiveHolder<Store>): AbstractTableModel() {
 
     private var rows = emptyList<List<String>>()
 
@@ -13,10 +14,10 @@ class ValuesTableModel(storeHolder: ReactiveHolder<Store>): AbstractTableModel()
         storeHolder.onChange.listeners.add { oldStore ->
             val store = storeHolder.get()
 
-            if (store.points != oldStore.points || store.pointValues != oldStore.pointValues) {
-                val rows = store.points.map { point -> listOf(point.toString(),
-                        store.pointValues?.getValue(point)?.first?.toString() ?: "",
-                        store.pointValues?.getValue(point)?.second?.toString() ?: "") }
+            if (store.valuePoints != oldStore.valuePoints || store.values != oldStore.values) {
+                val rows = store.valuePoints.map { point -> listOf(point.toString(),
+                        store.values?.getValue(point)?.first?.toString() ?: "",
+                        store.values?.getValue(point)?.second?.toString() ?: "") }
 
                 if (rows != this.rows) {
                     SwingUtilities.invokeLater {
@@ -43,6 +44,26 @@ class ValuesTableModel(storeHolder: ReactiveHolder<Store>): AbstractTableModel()
     override fun getColumnClass(columnIndex: Int) = String::class.java
 
     override fun getValueAt(rowIndex: Int, columnIndex: Int) = rows.getOrNull(rowIndex)?.getOrNull(columnIndex)
-    override fun setValueAt(aValue: Any?, rowIndex: Int, columnIndex: Int) {}
+    override fun setValueAt(value: Any?, rowIndex: Int, columnIndex: Int) {
+        if (columnIndex == 0) {
+            val newValue = when (value) {
+                is Fraction -> value
+                is String -> try {
+                    Fraction(value)
+                } catch (e: Exception) {
+                    return
+                }
+
+                else -> return
+            }
+
+            storeHolder.mutateIfOther { store ->
+                store.copy(valuePoints = store.valuePoints.mapIndexed { i, oldValue -> when (i) {
+                    rowIndex -> newValue
+                    else -> oldValue
+                } })
+            }
+        }
+    }
     override fun isCellEditable(rowIndex: Int, columnIndex: Int) = true
 }

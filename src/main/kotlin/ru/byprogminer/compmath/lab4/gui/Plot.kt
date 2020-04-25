@@ -73,15 +73,15 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
         graphics.color = background
         graphics.fillRect(0, 0, width, height)
 
-        val intervalX = (store.plotAbscissaEnd - store.plotAbscissaBegin).toDouble()
-        val intervalY = (store.plotOrdinateEnd - store.plotOrdinateBegin).toDouble()
+        val intervalX = ((store.plotAbscissaEnd ?: Fraction.ZERO) - (store.plotAbscissaBegin ?: Fraction.ZERO)).toDouble()
+        val intervalY = ((store.plotOrdinateEnd ?: Fraction.ZERO) - (store.plotOrdinateBegin ?: Fraction.ZERO)).toDouble()
         val signX = if (intervalX < 0) -1 else 1
         val signY = if (intervalY < 0) 1 else -1
 
         val zoomX = width / intervalX
         val zoomY = -height / intervalY
-        val centerX = -(store.plotAbscissaBegin * Fraction(zoomX)).toDouble()
-        val centerY = -(store.plotOrdinateEnd * Fraction(zoomY)).toDouble()
+        val centerX = -((store.plotAbscissaBegin ?: Fraction.ZERO) * Fraction(zoomX)).toDouble()
+        val centerY = -((store.plotOrdinateEnd ?: Fraction.ZERO) * Fraction(zoomY)).toDouble()
 
         // Grid
 
@@ -208,8 +208,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
                     store.function to store.functionColor,
                     store.interpolation to store.interpolationColor
             ).filter { eq -> try {
-                eq.first.variables
-                return@filter true
+                return@filter eq.first.variables.size == 1
             } catch (e: UnsupportedOperationException) {
                 return@filter false
             } }
@@ -222,7 +221,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
             val futures = mutableListOf<CompletableFuture<Void>>()
             for ((equation, color) in equations) {
                 futures.add(CompletableFuture.runAsync {
-                    var realX = store.plotAbscissaBegin
+                    var realX = store.plotAbscissaBegin ?: Fraction.ZERO
 
                     var prevY: Int? = null
                     for (x in 0 until width) {
@@ -257,14 +256,14 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
 
         // Points
 
-        if (store.plotAbscissaVariable != null && !store.pointValues.isNullOrEmpty()) {
+        if (store.plotAbscissaVariable != null && !store.values.isNullOrEmpty()) {
             graphics.color = POINTS_COLOR
 
             if (graphics is Graphics2D) {
                 graphics.stroke = BasicStroke(4f)
             }
 
-            for ((realX, realY) in store.pointValues) {
+            for ((realX, realY) in store.values) {
                 val (realFunctionY, realInterpolationY) = realY
                 val x = (Fraction(centerX) + realX * Fraction(zoomX)).toInt()
 
@@ -331,8 +330,14 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
             val deltaY = e.y - mouseY
 
             store.mutateIfOther { store ->
-                val (width, height) = sizeWithoutBorder.run { width to height }
+                if (
+                        store.plotAbscissaBegin == null || store.plotAbscissaEnd == null ||
+                        store.plotOrdinateBegin == null || store.plotOrdinateEnd == null
+                ) {
+                    return@mutateIfOther store
+                }
 
+                val (width, height) = sizeWithoutBorder.run { width to height }
                 val intervalX = (store.plotAbscissaEnd - store.plotAbscissaBegin).toDouble()
                 val intervalY = (store.plotOrdinateEnd - store.plotOrdinateBegin).toDouble()
 
@@ -352,11 +357,18 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
     }
 
     override fun mouseWheelMoved(e: MouseWheelEvent) {
-        val amount: Double = e.wheelRotation.toDouble() * 1.68
+        val amount: Double = e.wheelRotation.toDouble() * 1.68 *
+                if (e.isControlDown) 10 else 1
 
         store.mutateIfOther { store ->
-            val (width, height) = sizeWithoutBorder.run { width to height }
+            if (
+                    store.plotAbscissaBegin == null || store.plotAbscissaEnd == null ||
+                    store.plotOrdinateBegin == null || store.plotOrdinateEnd == null
+            ) {
+                return@mutateIfOther store
+            }
 
+            val (width, height) = sizeWithoutBorder.run { width to height }
             val intervalX = (store.plotAbscissaEnd - store.plotAbscissaBegin).toDouble()
             val intervalY = (store.plotOrdinateEnd - store.plotOrdinateBegin).toDouble()
 

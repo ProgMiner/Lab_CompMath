@@ -39,9 +39,9 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
     private val interpolationPointsLabel = JLabel("Interpolation points:")
     private val interpolationPointsAddButton = JButton(ADD_ICON)
     private val interpolationPointsRemoveButton = JButton(REMOVE_ICON)
-    private val interpolationPointsListModel = DefaultListModel<Fraction>()
-    private val interpolationPointsList = JList(interpolationPointsListModel)
-    private val interpolationPointsListPane = JScrollPane(interpolationPointsList)
+    private val interpolationPointsTableModel = InterpolationPointsTableModel(store)
+    private val interpolationPointsTable = JTable(interpolationPointsTableModel)
+    private val interpolationPointsTablePane = JScrollPane(interpolationPointsTable)
     private val valuesPanel = JPanel(GridBagLayout())
     private val valuesLabel = JLabel("Values:")
     private val valuesAddButton = JButton(ADD_ICON)
@@ -140,34 +140,35 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         }
         interpolationPointsPanel.add(interpolationPointsRemoveButton, GridBagConstraints(2, 0, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.NONE, Insets(0, 0, 5, 0), 0, 0))
 
-        interpolationPointsList.selectionModel.addListSelectionListener { manualChange {
-            selectedInterpolationPoint.setIfOther(interpolationPointsList.selectedIndex.let {
+        interpolationPointsTable.selectionModel.addListSelectionListener {
+            selectedInterpolationPoint.setIfOther(interpolationPointsTable.selectedRow.let {
                 when (it) {
                     -1 -> null
                     else -> it
                 }
             })
-        } }
-        interpolationPointsListModel.addListDataListener(listDataAdapter {
+        }
+        interpolationPointsTableModel.addTableModelListener {
             val oldIndex = selectedInterpolationPoint.get()
 
             if (oldIndex != null) {
                 SwingUtilities.invokeLater {
-                    val index = if (interpolationPointsListModel.size <= oldIndex) {
-                        interpolationPointsListModel.size - 1
+                    val index = if (interpolationPointsTableModel.rowCount <= oldIndex) {
+                        interpolationPointsTableModel.rowCount - 1
                     } else {
                         oldIndex
                     }
 
                     if (index >= 0) {
-                        interpolationPointsList.setSelectionInterval(index, index)
+                        interpolationPointsTable.setRowSelectionInterval(index, index)
                     }
                 }
             }
-        })
-        interpolationPointsList.fixedCellHeight = 24
-        interpolationPointsListPane.preferredSize = Dimension(150, 200)
-        interpolationPointsPanel.add(interpolationPointsListPane, GridBagConstraints(0, 1, 3, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 5, 0), 0, 0))
+        }
+        interpolationPointsTable.rowHeight = 24
+        interpolationPointsTable.tableHeader = null
+        interpolationPointsTablePane.preferredSize = Dimension(150, 200)
+        interpolationPointsPanel.add(interpolationPointsTablePane, GridBagConstraints(0, 1, 3, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 5, 0), 0, 0))
         controlPanel.add(interpolationPointsPanel, GridBagConstraints(0, 2, 1, 1, .0, 1.0, GridBagConstraints.WEST, GridBagConstraints.BOTH, Insets(0, 0, 5, 0), 0, 0))
         controlPanel.add(JSeparator(JSeparator.HORIZONTAL), GridBagConstraints(0, 3, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 0), 0, 0))
 

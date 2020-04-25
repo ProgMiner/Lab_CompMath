@@ -13,7 +13,7 @@ WHITESPACE: [ \t\n\r]+ -> skip;
 // Rules
 
 expression
-    : expr
+    : expr EOF
 ;
 
 expr

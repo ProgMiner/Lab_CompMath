@@ -1,6 +1,5 @@
 package ru.byprogminer.compmath.lab4.gui
 
-import ru.byprogminer.compmath.lab1.utils.Fraction
 import ru.byprogminer.compmath.lab4.Store
 import ru.byprogminer.compmath.lab4.util.ReactiveHolder
 import ru.byprogminer.compmath.lab4.util.toPlainString
@@ -73,15 +72,15 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
         graphics.color = background
         graphics.fillRect(0, 0, width, height)
 
-        val intervalX = ((store.plotAbscissaEnd ?: Fraction.ZERO) - (store.plotAbscissaBegin ?: Fraction.ZERO)).toDouble()
-        val intervalY = ((store.plotOrdinateEnd ?: Fraction.ZERO) - (store.plotOrdinateBegin ?: Fraction.ZERO)).toDouble()
+        val intervalX = ((store.plotAbscissaEnd ?: .0) - (store.plotAbscissaBegin ?: .0))
+        val intervalY = ((store.plotOrdinateEnd ?: .0) - (store.plotOrdinateBegin ?: .0))
         val signX = if (intervalX < 0) -1 else 1
         val signY = if (intervalY < 0) 1 else -1
 
         val zoomX = width / intervalX
         val zoomY = -height / intervalY
-        val centerX = -((store.plotAbscissaBegin ?: Fraction.ZERO) * Fraction(zoomX)).toDouble()
-        val centerY = -((store.plotOrdinateEnd ?: Fraction.ZERO) * Fraction(zoomY)).toDouble()
+        val centerX = -(store.plotAbscissaBegin ?: .0) * zoomX
+        val centerY = -(store.plotOrdinateEnd ?: .0) * zoomY
 
         // Grid
 
@@ -217,11 +216,11 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
                 graphics.stroke = BasicStroke(2f)
             }
 
-            val realXStep = Fraction(1 / zoomX)
+            val realXStep = 1 / zoomX
             val futures = mutableListOf<CompletableFuture<Void>>()
             for ((equation, color) in equations) {
                 futures.add(CompletableFuture.runAsync {
-                    var realX = store.plotAbscissaBegin ?: Fraction.ZERO
+                    var realX = store.plotAbscissaBegin ?: .0
 
                     var prevY: Int? = null
                     for (x in 0 until width) {
@@ -234,7 +233,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
 
                             graphics.color = color
                             // if (realResult.isFinite()) {
-                                val y = (Fraction(centerY) + realResult * Fraction(zoomY)).toInt()
+                                val y = (centerY + realResult * zoomY).toInt()
 
                                 if (actualPrevY != null) {
                                     graphics.drawLine(x - 1, actualPrevY, x, y)
@@ -265,12 +264,12 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
 
             for ((realX, realY) in store.values) {
                 val (realFunctionY, realInterpolationY) = realY
-                val x = (Fraction(centerX) + realX * Fraction(zoomX)).toInt()
+                val x = (centerX + realX * zoomX).toInt()
 
-                val functionY = (Fraction(centerY) + realFunctionY * Fraction(zoomY)).toInt()
+                val functionY = (centerY + realFunctionY * zoomY).toInt()
                 graphics.drawLine(x, functionY, x, functionY)
 
-                val interpolationY = (Fraction(centerY) + realInterpolationY * Fraction(zoomY)).toInt()
+                val interpolationY = (centerY + realInterpolationY * zoomY).toInt()
                 graphics.drawLine(x, interpolationY, x, interpolationY)
             }
 
@@ -338,16 +337,16 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
                 }
 
                 val (width, height) = sizeWithoutBorder.run { width to height }
-                val intervalX = (store.plotAbscissaEnd - store.plotAbscissaBegin).toDouble()
-                val intervalY = (store.plotOrdinateEnd - store.plotOrdinateBegin).toDouble()
+                val intervalX = store.plotAbscissaEnd - store.plotAbscissaBegin
+                val intervalY = store.plotOrdinateEnd - store.plotOrdinateBegin
 
                 val zoomX = intervalX / width
                 val zoomY = -intervalY / height
                 return@mutateIfOther store.copy(
-                        plotAbscissaBegin = store.plotAbscissaBegin - Fraction(deltaX * zoomX),
-                        plotAbscissaEnd = store.plotAbscissaEnd - Fraction(deltaX * zoomX),
-                        plotOrdinateBegin = store.plotOrdinateBegin - Fraction(deltaY * zoomY),
-                        plotOrdinateEnd = store.plotOrdinateEnd - Fraction(deltaY * zoomY)
+                        plotAbscissaBegin = store.plotAbscissaBegin - deltaX * zoomX,
+                        plotAbscissaEnd = store.plotAbscissaEnd - deltaX * zoomX,
+                        plotOrdinateBegin = store.plotOrdinateBegin - deltaY * zoomY,
+                        plotOrdinateEnd = store.plotOrdinateEnd - deltaY * zoomY
                 )
             }
         }
@@ -381,19 +380,19 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
                 val amountXByY = amountY * intervalX / intervalY
 
                 store.copy(
-                        plotAbscissaBegin = store.plotAbscissaBegin - Fraction(amountXByY),
-                        plotAbscissaEnd = store.plotAbscissaEnd + Fraction(amountXByY),
-                        plotOrdinateBegin = store.plotOrdinateBegin - Fraction(amountY),
-                        plotOrdinateEnd = store.plotOrdinateEnd + Fraction(amountY)
+                        plotAbscissaBegin = store.plotAbscissaBegin - amountXByY,
+                        plotAbscissaEnd = store.plotAbscissaEnd + amountXByY,
+                        plotOrdinateBegin = store.plotOrdinateBegin - amountY,
+                        plotOrdinateEnd = store.plotOrdinateEnd + amountY
                 )
             } else {
                 val amountYByX = amountX * intervalY / intervalX
 
                 store.copy(
-                        plotAbscissaBegin = store.plotAbscissaBegin - Fraction(amountX),
-                        plotAbscissaEnd = store.plotAbscissaEnd + Fraction(amountX),
-                        plotOrdinateBegin = store.plotOrdinateBegin - Fraction(amountYByX),
-                        plotOrdinateEnd = store.plotOrdinateEnd + Fraction(amountYByX)
+                        plotAbscissaBegin = store.plotAbscissaBegin - amountX,
+                        plotAbscissaEnd = store.plotAbscissaEnd + amountX,
+                        plotOrdinateBegin = store.plotOrdinateBegin - amountYByX,
+                        plotOrdinateEnd = store.plotOrdinateEnd + amountYByX
                 )
             }
         }

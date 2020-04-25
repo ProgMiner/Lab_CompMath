@@ -1,6 +1,5 @@
 package ru.byprogminer.compmath.lab4.gui
 
-import ru.byprogminer.compmath.lab1.utils.Fraction
 import ru.byprogminer.compmath.lab4.Store
 import ru.byprogminer.compmath.lab4.util.ReactiveHolder
 import javax.swing.SwingUtilities
@@ -46,17 +45,15 @@ class ValuesTableModel(private val storeHolder: ReactiveHolder<Store>): Abstract
     override fun getValueAt(rowIndex: Int, columnIndex: Int) = rows.getOrNull(rowIndex)?.getOrNull(columnIndex)
     override fun setValueAt(value: Any?, rowIndex: Int, columnIndex: Int) {
         if (columnIndex == 0 && value is String) {
-            val newValue = try {
-                Fraction(value)
-            } catch (e: Exception) {
-                return
-            }
+            val newValue = value.toDoubleOrNull()
 
-            storeHolder.mutateIfOther { store ->
-                store.copy(valuePoints = store.valuePoints.mapIndexed { i, oldValue -> when (i) {
-                    rowIndex -> newValue
-                    else -> oldValue
-                } })
+            if (newValue != null) {
+                storeHolder.mutateIfOther { store ->
+                    store.copy(valuePoints = store.valuePoints.mapIndexed { i, oldValue -> when (i) {
+                        rowIndex -> newValue
+                        else -> oldValue
+                    } })
+                }
             }
         }
     }

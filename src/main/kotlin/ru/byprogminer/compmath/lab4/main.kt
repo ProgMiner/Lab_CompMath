@@ -1,6 +1,5 @@
 package ru.byprogminer.compmath.lab4
 
-import ru.byprogminer.compmath.lab1.utils.Fraction
 import ru.byprogminer.compmath.lab4.equation.Expression
 import ru.byprogminer.compmath.lab4.equation.InvalidExpression
 import ru.byprogminer.compmath.lab4.gui.MainWindow
@@ -31,10 +30,10 @@ fun main() {
             null,
 
             null,
-            Fraction(-100),
-            Fraction(100),
-            Fraction(-100),
-            Fraction(100)
+            -100.0,
+            100.0,
+            -100.0,
+            100.0
     ))
 
     store.onChange.listeners.add { oldStore, storeHolder ->

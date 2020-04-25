@@ -1,6 +1,5 @@
 package ru.byprogminer.compmath.lab4.gui
 
-import ru.byprogminer.compmath.lab1.utils.Fraction
 import ru.byprogminer.compmath.lab4.Store
 import ru.byprogminer.compmath.lab4.util.ReactiveHolder
 import javax.swing.SwingUtilities
@@ -15,7 +14,7 @@ class InterpolationPointsTableModel(private val storeHolder: ReactiveHolder<Stor
             val store = storeHolder.get()
 
             if (store.interpolationPoints != oldStore.valuePoints) {
-                val rows = store.interpolationPoints.map(Fraction::toString)
+                val rows = store.interpolationPoints.map(Double::toString)
 
                 if (rows != this.rows) {
                     SwingUtilities.invokeLater {
@@ -42,17 +41,15 @@ class InterpolationPointsTableModel(private val storeHolder: ReactiveHolder<Stor
     override fun getValueAt(rowIndex: Int, columnIndex: Int) = rows.getOrNull(rowIndex)
     override fun setValueAt(value: Any?, rowIndex: Int, columnIndex: Int) {
         if (columnIndex == 0 && value is String) {
-            val newValue = try {
-                Fraction(value)
-            } catch (e: Exception) {
-                return
-            }
+            val newValue = value.toDoubleOrNull()
 
-            storeHolder.mutateIfOther { store ->
-                store.copy(interpolationPoints = store.interpolationPoints.mapIndexed { i, oldValue -> when (i) {
-                    rowIndex -> newValue
-                    else -> oldValue
-                } })
+            if (newValue != null) {
+                storeHolder.mutateIfOther { store ->
+                    store.copy(interpolationPoints = store.interpolationPoints.mapIndexed { i, oldValue -> when (i) {
+                        rowIndex -> newValue
+                        else -> oldValue
+                    } })
+                }
             }
         }
     }

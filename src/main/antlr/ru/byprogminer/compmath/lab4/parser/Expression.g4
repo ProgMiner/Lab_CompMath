@@ -21,7 +21,7 @@ expr
     | '|' expr '|' #exprAbs
     | <assoc=right> left=expr '^' right=expr #exprPower
     | op='-' expr #exprUnaryMinus
-    | function ('^' pow=expr)? expr #exprFunction
+    | function expr #exprFunction
     | left=expr op=('*'|'/') right=expr #exprMultiplyDivide
     | left=expr op=('+'|'-') right=expr #exprPlusMinus
     | variable #exprVariable

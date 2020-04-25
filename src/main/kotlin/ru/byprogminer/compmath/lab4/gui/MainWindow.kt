@@ -1,7 +1,5 @@
 package ru.byprogminer.compmath.lab4.gui
 
-import ru.byprogminer.compmath.lab1.utils.Fraction
-import ru.byprogminer.compmath.lab1.utils.toFractionOrNull
 import ru.byprogminer.compmath.lab4.APP_NAME
 import ru.byprogminer.compmath.lab4.APP_VERSION
 import ru.byprogminer.compmath.lab4.Store
@@ -11,9 +9,9 @@ import ru.byprogminer.compmath.lab4.util.ReactiveHolder
 import ru.byprogminer.compmath.lab4.util.reactiveHolder
 import ru.byprogminer.compmath.lab4.util.toPlainString
 import java.awt.*
-import java.math.BigInteger
 import javax.swing.*
 import kotlin.concurrent.thread
+import kotlin.math.abs
 
 class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION") {
 
@@ -120,7 +118,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         interpolationPointsAddButton.minimumSize = Dimension(20, 20)
         interpolationPointsAddButton.addActionListener {
             store.mutateIfOther { store ->
-                store.copy(interpolationPoints = store.interpolationPoints + listOf(Fraction.ZERO))
+                store.copy(interpolationPoints = store.interpolationPoints + listOf(.0))
             }
         }
         interpolationPointsPanel.add(interpolationPointsAddButton, GridBagConstraints(1, 0, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.NONE, Insets(0, 0, 5, 5), 0, 0))
@@ -177,7 +175,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         valuesAddButton.minimumSize = Dimension(20, 20)
         valuesAddButton.addActionListener {
             store.mutateIfOther { store ->
-                store.copy(valuePoints = store.valuePoints + listOf(Fraction.ZERO))
+                store.copy(valuePoints = store.valuePoints + listOf(.0))
             }
         }
         valuesPanel.add(valuesAddButton, GridBagConstraints(1, 0, 1, 1, .0, .0, GridBagConstraints.BASELINE, GridBagConstraints.NONE, Insets(0, 0, 5, 5), 0, 0))
@@ -239,7 +237,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
 
         plotAbscissaBeginField.document.addDocumentListener(documentAdapter { manualChange {
             store.mutateIfOther { store ->
-                store.copy(plotAbscissaBegin = plotAbscissaBeginField.text.toFractionOrNull())
+                store.copy(plotAbscissaBegin = plotAbscissaBeginField.text.toDoubleOrNull())
             }
         } })
         plotPanel.add(plotAbscissaBeginField, GridBagConstraints(2, 1, 1, 1, 1.0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 5), 0, 0))
@@ -247,7 +245,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
 
         plotAbscissaEndField.document.addDocumentListener(documentAdapter { manualChange {
             store.mutateIfOther { store ->
-                store.copy(plotAbscissaEnd = plotAbscissaEndField.text.toFractionOrNull())
+                store.copy(plotAbscissaEnd = plotAbscissaEndField.text.toDoubleOrNull())
             }
         } })
         plotPanel.add(plotAbscissaEndField, GridBagConstraints(4, 1, 1, 1, 1.0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 5), 0, 0))
@@ -269,7 +267,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
 
         plotOrdinateBeginField.document.addDocumentListener(documentAdapter { manualChange {
             store.mutateIfOther { store ->
-                store.copy(plotOrdinateBegin = plotOrdinateBeginField.text.toFractionOrNull())
+                store.copy(plotOrdinateBegin = plotOrdinateBeginField.text.toDoubleOrNull())
             }
         } })
         plotPanel.add(plotOrdinateBeginField, GridBagConstraints(2, 2, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 5), 0, 0))
@@ -277,7 +275,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
 
         plotOrdinateEndField.document.addDocumentListener(documentAdapter { manualChange {
             store.mutateIfOther { store ->
-                store.copy(plotOrdinateEnd = plotOrdinateEndField.text.toFractionOrNull())
+                store.copy(plotOrdinateEnd = plotOrdinateEndField.text.toDoubleOrNull())
             }
         } })
         plotPanel.add(plotOrdinateEndField, GridBagConstraints(4, 2, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 5), 0, 0))
@@ -308,27 +306,27 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
 
                 val intervalAbscissa = store.plotAbscissaEnd - store.plotAbscissaBegin
                 val intervalOrdinate = store.plotOrdinateEnd - store.plotOrdinateBegin
-                val centerAbscissa = store.plotAbscissaBegin + intervalAbscissa / Fraction(2)
-                val centerOrdinate = store.plotOrdinateBegin + intervalOrdinate / Fraction(2)
+                val centerAbscissa = store.plotAbscissaBegin + intervalAbscissa / 2
+                val centerOrdinate = store.plotOrdinateBegin + intervalOrdinate / 2
 
-                val intervalOrdinateForAbscissa = intervalAbscissa * Fraction(BigInteger.valueOf(height.toLong()), BigInteger.valueOf(width.toLong()))
-                val intervalAbscissaForOrdinate = intervalOrdinate * Fraction(BigInteger.valueOf(width.toLong()), BigInteger.valueOf(height.toLong()))
+                val intervalOrdinateForAbscissa = intervalAbscissa * height / width
+                val intervalAbscissaForOrdinate = intervalOrdinate * width / height.toLong()
 
                 val areaForAbscissa = intervalAbscissa * intervalOrdinateForAbscissa
                 val areaForOrdinate = intervalAbscissaForOrdinate * intervalOrdinate
 
                 val (newIntervalAbscissa, newIntervalOrdinate) =
                         if (areaForAbscissa >= areaForOrdinate) {
-                            intervalAbscissa to (intervalOrdinateForAbscissa.abs() * if (intervalOrdinate < Fraction.ZERO) -Fraction.ONE else Fraction.ONE)
+                            intervalAbscissa to (abs(intervalOrdinateForAbscissa) * if (intervalOrdinate < 0) -1 else 1)
                         } else {
-                            (intervalAbscissaForOrdinate.abs() * if (intervalAbscissa < Fraction.ZERO) -Fraction.ONE else Fraction.ONE) to intervalOrdinate
+                            (abs(intervalAbscissaForOrdinate) * if (intervalAbscissa < 0) -1 else 1) to intervalOrdinate
                         }
 
                 return@mutateIfOther store.copy(
-                        plotAbscissaBegin = centerAbscissa - newIntervalAbscissa / Fraction(2),
-                        plotAbscissaEnd = centerAbscissa + newIntervalAbscissa / Fraction(2),
-                        plotOrdinateBegin = centerOrdinate - newIntervalOrdinate / Fraction(2),
-                        plotOrdinateEnd = centerOrdinate + newIntervalOrdinate / Fraction(2)
+                        plotAbscissaBegin = centerAbscissa - newIntervalAbscissa / 2,
+                        plotAbscissaEnd = centerAbscissa + newIntervalAbscissa / 2,
+                        plotOrdinateBegin = centerOrdinate - newIntervalOrdinate / 2,
+                        plotOrdinateEnd = centerOrdinate + newIntervalOrdinate / 2
                 )
             }
         }
@@ -380,8 +378,8 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
             }
 
             // plotAbscissaBegin
-            if (plotAbscissaBeginField.text.toFractionOrNull() != store.plotAbscissaBegin) {
-                plotAbscissaBeginField.text = store.plotAbscissaBegin?.toDouble()?.toPlainString()
+            if (plotAbscissaBeginField.text.toDoubleOrNull() != store.plotAbscissaBegin) {
+                plotAbscissaBeginField.text = store.plotAbscissaBegin?.toPlainString()
             }
 
             plotAbscissaBeginField.background = when (store.plotAbscissaBegin) {
@@ -390,8 +388,8 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
             }
 
             // plotAbscissaEnd
-            if (plotAbscissaEndField.text.toFractionOrNull() != store.plotAbscissaEnd) {
-                plotAbscissaEndField.text = store.plotAbscissaEnd?.toDouble()?.toPlainString()
+            if (plotAbscissaEndField.text.toDoubleOrNull() != store.plotAbscissaEnd) {
+                plotAbscissaEndField.text = store.plotAbscissaEnd?.toPlainString()
             }
 
             plotAbscissaEndField.background = when (store.plotAbscissaEnd) {
@@ -400,8 +398,8 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
             }
 
             // plotOrdinateBegin
-            if (plotOrdinateBeginField.text.toFractionOrNull() != store.plotOrdinateBegin) {
-                plotOrdinateBeginField.text = store.plotOrdinateBegin?.toDouble()?.toPlainString()
+            if (plotOrdinateBeginField.text.toDoubleOrNull() != store.plotOrdinateBegin) {
+                plotOrdinateBeginField.text = store.plotOrdinateBegin?.toPlainString()
             }
 
             plotOrdinateBeginField.background = when (store.plotOrdinateBegin) {
@@ -410,8 +408,8 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
             }
 
             // plotOrdinateEnd
-            if (plotOrdinateEndField.text.toFractionOrNull() != store.plotOrdinateEnd) {
-                plotOrdinateEndField.text = store.plotOrdinateEnd?.toDouble()?.toPlainString()
+            if (plotOrdinateEndField.text.toDoubleOrNull() != store.plotOrdinateEnd) {
+                plotOrdinateEndField.text = store.plotOrdinateEnd?.toPlainString()
             }
 
             plotOrdinateEndField.background = when (store.plotOrdinateEnd) {

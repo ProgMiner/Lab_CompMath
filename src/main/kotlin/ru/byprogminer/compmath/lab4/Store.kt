@@ -1,6 +1,5 @@
 package ru.byprogminer.compmath.lab4
 
-import ru.byprogminer.compmath.lab1.utils.Fraction
 import ru.byprogminer.compmath.lab4.equation.Expression
 import java.awt.Color
 
@@ -10,16 +9,16 @@ data class Store(
 
         val interpolation: Expression,
         val interpolationColor: Color,
-        val interpolationPoints: List<Fraction>,
+        val interpolationPoints: List<Double>,
 
-        val valuePoints: List<Fraction>,
-        val values: Map<Fraction, Pair<Fraction, Fraction>>?,
+        val valuePoints: List<Double>,
+        val values: Map<Double, Pair<Double, Double>>?,
 
         val plotAbscissaVariable: String?,
-        val plotAbscissaBegin: Fraction?,
-        val plotAbscissaEnd: Fraction?,
-        val plotOrdinateBegin: Fraction?,
-        val plotOrdinateEnd: Fraction?
+        val plotAbscissaBegin: Double?,
+        val plotAbscissaEnd: Double?,
+        val plotOrdinateBegin: Double?,
+        val plotOrdinateEnd: Double?
 ) {
 
     val variables: Set<String>

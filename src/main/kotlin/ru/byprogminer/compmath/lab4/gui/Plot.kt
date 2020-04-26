@@ -221,34 +221,112 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
             val futures = mutableListOf<CompletableFuture<Void>>()
             for ((equation, color) in equations) {
                 futures.add(CompletableFuture.runAsync {
-                    var realX = store.plotAbscissaBegin ?: .0
-                    val path = Path2D.Double()
-
-                    var prevY: Double? = null
-                    for (x in 0 until width) {
-                        realX += realXStep
-
-                        val realResult = equation.evaluate(mapOf(store.plotAbscissaVariable to realX))
-                        @Suppress("LiftReturnOrAssignment")
-                        if (realResult.isFinite()) {
-                            val y = centerY + realResult * zoomY
-
-                            if (prevY == null) {
-                                path.moveTo(x.toDouble(), y)
+                    if (graphics is Graphics2D) {
+                        val points = (0 until width).map { x ->
+                            x to equation.evaluate(mapOf(
+                                    store.plotAbscissaVariable to (store.plotAbscissaBegin ?: .0) + x * realXStep
+                            ))
+                        }.map { (x, realY) ->
+                            x.toDouble() to if (realY.isFinite()) {
+                                centerY + realY * zoomY
                             } else {
-                                path.lineTo(x.toDouble(), y)
+                                null
+                            }
+                        }.map(::listOf).reduce { acc, current ->
+                            val (currentX, currentY) = current[0]
+
+                            if (acc.size == 1) {
+                                return@reduce acc + current
                             }
 
-                            prevY = y
-                        } else {
-                            prevY = null
-                        }
-                    }
+                            val (prevX, prevY) = acc.last()
+                            val subAcc = acc.subList(0, acc.lastIndex)
+                            if (currentY == null && prevY == null) {
+                                return@reduce subAcc + current
+                            }
 
-                    synchronized(graphics) {
-                        if (graphics is Graphics2D) {
+                            val (prevPrevX, prevPrevY) = acc[acc.size - 2]
+                            if (currentY == null || prevY == null || prevPrevY == null) {
+                                return@reduce acc + current
+                            }
+
+                            val isOnLine = abs((currentX - prevPrevX) * (prevY - prevPrevY) /
+                                    (prevX - prevPrevX) + prevPrevY - currentY) < 0.01
+
+                            return@reduce if (isOnLine) {
+                                subAcc + current
+                            } else {
+                                acc + current
+                            }
+                        }
+
+                        val path = Path2D.Double()
+                        for (i in points.indices) {
+                            val prev = points.getOrNull(i - 1)
+                            val cur = points[i]
+
+                            val (curX, curY) = cur
+                            if (prev?.second == null || curY == null) {
+                                if (curY != null) {
+                                    path.moveTo(curX, curY)
+                                    path.lineTo(curX, curY)
+                                }
+
+                                continue
+                            }
+
+                            val next = points.getOrNull(i + 1)
+                            val prevPrev = points.getOrNull(i - 2)
+                            val (prevX, prevY) = prev.first to prev.second!!
+                            if (prevPrev?.second == null || next?.second == null) {
+                                path.lineTo(curX, curY)
+                                continue
+                            }
+
+                            val (prevPrevX, prevPrevY) = prevPrev.first to prevPrev.second!!
+                            val (nextX, nextY) = next.first to next.second!!
+
+                            val a = (nextY - curY) / (nextX - curX)
+                            val b = (prevY - prevPrevY) / (prevX - prevPrevX)
+
+                            val y = (curY + a * (prevPrevX - curX - prevPrevY / b)) / (1 - a / b)
+                            val x = (y - prevPrevY) / b + prevPrevX
+
+                            if (x < prevX || x > curX || y < prevY || y > curY) {
+                                path.lineTo(curX, curY)
+                                continue
+                            }
+
+                            path.quadTo(x, y, curX, curY)
+                        }
+
+                        synchronized(graphics) {
                             graphics.color = color
                             graphics.draw(path)
+                        }
+                    } else {
+                        var realX = store.plotAbscissaBegin ?: .0
+                        var prevY: Int? = null
+
+                        for (x in 0 until width) {
+                            realX += realXStep
+
+                            val realResult = equation.evaluate(mapOf(store.plotAbscissaVariable to realX))
+
+                            synchronized(graphics) {
+                                val actualPrevY = prevY
+
+                                graphics.color = color
+                                if (realResult.isFinite()) {
+                                    val y = (centerY + realResult * zoomY).toInt()
+
+                                    if (actualPrevY != null) {
+                                        graphics.drawLine(x - 1, actualPrevY, x, y)
+                                    }
+
+                                    prevY = y
+                                }
+                            }
                         }
                     }
                 })
@@ -376,8 +454,8 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
             }
 
             val (width, height) = sizeWithoutBorder.run { width to height }
-            val intervalX = (store.plotAbscissaEnd - store.plotAbscissaBegin).toDouble()
-            val intervalY = (store.plotOrdinateEnd - store.plotOrdinateBegin).toDouble()
+            val intervalX = store.plotAbscissaEnd - store.plotAbscissaBegin
+            val intervalY = store.plotOrdinateEnd - store.plotOrdinateBegin
 
             val amountX = amount * intervalX / width / 2
             val amountY = amount * intervalY / height / 2

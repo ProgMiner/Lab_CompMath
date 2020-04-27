@@ -70,6 +70,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
             graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
         }
 
+        graphics.font = font
         graphics.color = background
         graphics.fillRect(0, 0, width, height)
 
@@ -89,7 +90,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
         if (realGridStep != .0) {
 
             val gridStepX = realGridStep * zoomX * signX
-            var currentGridLineX = centerX - (centerX / gridStepX).toInt() * gridStepX
+            var currentGridLineX = centerX - round(centerX / gridStepX) * gridStepX
             while (currentGridLineX < width) {
 
                 graphics.color = GRID_COLOR
@@ -99,7 +100,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
             }
 
             val gridStepY = realGridStep * zoomY * signY
-            var currentGridLineY = centerY - (centerY / gridStepY).toInt() * gridStepY
+            var currentGridLineY = centerY - round(centerY / gridStepY) * gridStepY
             while (currentGridLineY < height) {
 
                 graphics.color = GRID_COLOR
@@ -115,7 +116,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
         if (realGridStep != .0) {
 
             val gridStepX = realGridStep * zoomX * signX
-            var currentRealGridLineX = -(centerX / gridStepX + 1).toInt() * realGridStep * signX
+            var currentRealGridLineX = -round(centerX / gridStepX + 1) * realGridStep * signX
             var currentGridLineX = centerX + currentRealGridLineX / realGridStep * gridStepX * signX
             while (currentGridLineX < width) {
                 if (abs(currentGridLineX - centerX) > 1) {
@@ -136,7 +137,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
             }
 
             val gridStepY = realGridStep * zoomY * signY
-            var currentRealGridLineY = -(centerY / gridStepY).toInt() * realGridStep * signY
+            var currentRealGridLineY = -round(centerY / gridStepY) * realGridStep * signY
             var currentGridLineY = centerY + currentRealGridLineY / realGridStep * gridStepY * signY
             while (currentGridLineY < height + gridStepY) {
                 if (abs(currentGridLineY - centerY) > 1) {

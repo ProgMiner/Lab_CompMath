@@ -73,6 +73,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
     private var onStoreChangeRun = false
 
     init {
+        functionsFunctionLabel.font = computerModernFont
         functionsFunctionLabel.horizontalAlignment = JLabel.RIGHT
         functionsPanel.add(functionsFunctionLabel, GridBagConstraints(0, 0, 1, 1, .0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 5), 0, 0))
 
@@ -81,6 +82,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
                 store.copy(function = parse(functionsFunctionField.text))
             }
         } })
+        functionsFunctionField.font = computerModernFont
         functionsPanel.add(functionsFunctionField, GridBagConstraints(1, 0, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 5), 0, 0))
 
         functionsFunctionColorButton.preferredSize = Dimension(20, 20)
@@ -94,10 +96,12 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         }
         functionsPanel.add(functionsFunctionColorButton, GridBagConstraints(2, 0, 1, 1, .0, .0, GridBagConstraints.BASELINE, GridBagConstraints.NONE, Insets(0, 0, 5, 0), 0, 0))
 
+        functionsInterpolationLabel.font = computerModernFont
         functionsInterpolationLabel.horizontalAlignment = JLabel.RIGHT
         functionsPanel.add(functionsInterpolationLabel, GridBagConstraints(0, 1, 1, 1, .0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 5), 0, 0))
 
         functionsInterpolationField.isEnabled = false
+        functionsInterpolationField.font = computerModernFont
         functionsPanel.add(functionsInterpolationField, GridBagConstraints(1, 1, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 5), 0, 0))
 
         functionsInterpolationColorButton.preferredSize = Dimension(20, 20)
@@ -138,6 +142,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         }
         interpolationPointsPanel.add(interpolationPointsRemoveButton, GridBagConstraints(2, 0, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.NONE, Insets(0, 0, 5, 0), 0, 0))
 
+        interpolationPointsTable.font = computerModernFont
         interpolationPointsTable.selectionModel.addListSelectionListener {
             selectedInterpolationPoint.setIfOther(interpolationPointsTable.selectedRow.let {
                 when (it) {
@@ -195,6 +200,8 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         }
         valuesPanel.add(valuesRemoveButton, GridBagConstraints(2, 0, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.NONE, Insets(0, 0, 5, 0), 0, 0))
 
+        valuesTable.font = computerModernFont
+        valuesTable.tableHeader.font = computerModernFont
         valuesTable.selectionModel.addListSelectionListener {
             selectedValuesPoint.setIfOther(valuesTable.selectedRow.let {
                 when (it) {
@@ -226,10 +233,12 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         controlPanel.add(valuesPanel, GridBagConstraints(0, 4, 1, 1, .0, 1.68, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 5, 0), 0, 0))
         _contentPane.add(controlPanel, GridBagConstraints(0, 0, 1, 1, .0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.VERTICAL, Insets(0, 0, 0, 5), 0, 0))
 
+        plotPlot.font = computerModernFont
         plotPlot.border = BorderFactory.createLineBorder(null)
         plotPanel.add(plotPlot, GridBagConstraints(0, 0, 7, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 5, 0), 0, 0))
 
         plotAbscissaVariableField.isEnabled = false
+        plotAbscissaVariableField.font = computerModernFont
         plotAbscissaVariablePanel.add(plotAbscissaVariableField, GridBagConstraints(0, 1, 1, 1, 1.0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 0), 0, 0))
         plotAbscissaVariablePanel.add(plotAbscissaVariableColonLabel, GridBagConstraints(1, 1, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.NONE, Insets(0, 0, 0, 0), 0, 0))
         plotPanel.add(plotAbscissaVariablePanel, GridBagConstraints(0, 1, 1, 1, .0, .0, GridBagConstraints.EAST, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 5), 0, 0))
@@ -240,6 +249,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
                 store.copy(plotAbscissaBegin = plotAbscissaBeginField.text.toDoubleOrNull())
             }
         } })
+        plotAbscissaBeginField.font = computerModernFont
         plotPanel.add(plotAbscissaBeginField, GridBagConstraints(2, 1, 1, 1, 1.0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 5), 0, 0))
         plotPanel.add(plotAbscissaToLabel, GridBagConstraints(3, 1, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.NONE, Insets(0, 0, 5, 5), 0, 0))
 
@@ -248,6 +258,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
                 store.copy(plotAbscissaEnd = plotAbscissaEndField.text.toDoubleOrNull())
             }
         } })
+        plotAbscissaEndField.font = computerModernFont
         plotPanel.add(plotAbscissaEndField, GridBagConstraints(4, 1, 1, 1, 1.0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 5), 0, 0))
 
         plotAbscissaSwapButton.addActionListener {
@@ -270,6 +281,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
                 store.copy(plotOrdinateBegin = plotOrdinateBeginField.text.toDoubleOrNull())
             }
         } })
+        plotOrdinateBeginField.font = computerModernFont
         plotPanel.add(plotOrdinateBeginField, GridBagConstraints(2, 2, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 5), 0, 0))
         plotPanel.add(plotOrdinateToLabel, GridBagConstraints(3, 2, 1, 1, .0, .0, GridBagConstraints.BASELINE, GridBagConstraints.NONE, Insets(0, 0, 0, 5), 0, 0))
 
@@ -278,6 +290,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
                 store.copy(plotOrdinateEnd = plotOrdinateEndField.text.toDoubleOrNull())
             }
         } })
+        plotOrdinateEndField.font = computerModernFont
         plotPanel.add(plotOrdinateEndField, GridBagConstraints(4, 2, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 5), 0, 0))
 
         plotOrdinateSwapButton.addActionListener {

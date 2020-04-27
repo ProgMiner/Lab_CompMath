@@ -35,7 +35,7 @@ class ValuesTableModel(private val storeHolder: ReactiveHolder<Store>): Abstract
     override fun getColumnCount() = 3
     override fun getColumnName(columnIndex: Int) = when (columnIndex) {
         0 -> "x"
-        1 -> "F(x)"
+        1 -> "f(x)"
         2 -> "Ln(x)"
 
         else -> throw IllegalArgumentException()

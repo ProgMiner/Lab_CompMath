@@ -14,7 +14,7 @@ class InterpolationPointsTableModel(private val storeHolder: ReactiveHolder<Stor
         storeHolder.onChange.listeners.add { oldStore ->
             val store = storeHolder.get()
 
-            if (store.interpolationPoints != oldStore.valuePoints) {
+            if (store.interpolationPoints != oldStore.interpolationPoints) {
                 val rows = store.interpolationPoints.map { it.toPlainString() }
 
                 if (rows != this.rows) {

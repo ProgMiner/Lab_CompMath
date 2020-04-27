@@ -4,6 +4,10 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 fun Double.toPlainString(scale: Int = 12): String {
+    if (!isFinite()) {
+        return toString()
+    }
+
     if (toLong().toDouble() == this) {
         return toLong().toString()
     }

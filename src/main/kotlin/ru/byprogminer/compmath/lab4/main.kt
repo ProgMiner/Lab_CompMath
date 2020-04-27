@@ -1,9 +1,9 @@
 package ru.byprogminer.compmath.lab4
 
-import ru.byprogminer.compmath.lab4.expression.Expression
 import ru.byprogminer.compmath.lab4.expression.InvalidExpression
 import ru.byprogminer.compmath.lab4.gui.MainWindow
 import ru.byprogminer.compmath.lab4.gui.util.randomColor
+import ru.byprogminer.compmath.lab4.math.LagrangeMethod
 import ru.byprogminer.compmath.lab4.util.EventManager
 import ru.byprogminer.compmath.lab4.util.reactiveHolder
 import java.awt.Color
@@ -67,7 +67,7 @@ fun main() {
                     return@thread
                 }
 
-                val interpolation = TODO() as Expression
+                val interpolation = LagrangeMethod.interpolate(st.function, st.interpolationPoints.toSet())
                 storeHolder.mutateIfOther { s ->
                     val pointValues = s.valuePoints.map { point ->
                         point to (st.function.evaluate(mapOf(st.function.variables.first() to point)) to

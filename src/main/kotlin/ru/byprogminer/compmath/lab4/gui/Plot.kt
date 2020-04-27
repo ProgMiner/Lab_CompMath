@@ -223,7 +223,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
             for ((function, color) in functions) {
                 futures.add(CompletableFuture.runAsync {
                     if (graphics is Graphics2D) {
-                        val points = (0 until width).map { x ->
+                        val points = (0 until width).asSequence().map { x ->
                             x to function.evaluate(mapOf(
                                     store.plotAbscissaVariable to (store.plotAbscissaBegin ?: .0) + x * realXStep
                             ))
@@ -232,6 +232,11 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
                                 centerY + realY * zoomY
                             } else {
                                 null
+                            }
+                        }.map { (x, y) ->
+                            x to when (y) {
+                                null -> null
+                                else -> min(max(y, .0 - height), .0 + 2 * height)
                             }
                         }.map(::listOf).reduce { acc, current ->
                             val (currentX, currentY) = current[0]
@@ -259,7 +264,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
                             } else {
                                 acc + current
                             }
-                        }
+                        }.toList()
 
                         val path = Path2D.Double()
                         for (i in points.indices) {

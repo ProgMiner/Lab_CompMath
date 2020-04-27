@@ -3,7 +3,10 @@ package ru.byprogminer.compmath.lab4.gui
 import ru.byprogminer.compmath.lab4.APP_NAME
 import ru.byprogminer.compmath.lab4.APP_VERSION
 import ru.byprogminer.compmath.lab4.Store
-import ru.byprogminer.compmath.lab4.gui.util.*
+import ru.byprogminer.compmath.lab4.gui.util.ColorIconFactory
+import ru.byprogminer.compmath.lab4.gui.util.createImageIcon
+import ru.byprogminer.compmath.lab4.gui.util.documentAdapter
+import ru.byprogminer.compmath.lab4.gui.util.scale
 import ru.byprogminer.compmath.lab4.parser.parse
 import ru.byprogminer.compmath.lab4.util.ReactiveHolder
 import ru.byprogminer.compmath.lab4.util.reactiveHolder
@@ -100,7 +103,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         functionsInterpolationLabel.horizontalAlignment = JLabel.RIGHT
         functionsPanel.add(functionsInterpolationLabel, GridBagConstraints(0, 1, 1, 1, .0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 5), 0, 0))
 
-        functionsInterpolationField.isEnabled = false
+        functionsInterpolationField.isEditable = false
         functionsInterpolationField.font = computerModernFont
         functionsPanel.add(functionsInterpolationField, GridBagConstraints(1, 1, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 5), 0, 0))
 
@@ -237,7 +240,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         plotPlot.border = BorderFactory.createLineBorder(null)
         plotPanel.add(plotPlot, GridBagConstraints(0, 0, 7, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 5, 0), 0, 0))
 
-        plotAbscissaVariableField.isEnabled = false
+        plotAbscissaVariableField.isEditable = false
         plotAbscissaVariableField.font = computerModernFont
         plotAbscissaVariablePanel.add(plotAbscissaVariableField, GridBagConstraints(0, 1, 1, 1, 1.0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 0), 0, 0))
         plotAbscissaVariablePanel.add(plotAbscissaVariableColonLabel, GridBagConstraints(1, 1, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.NONE, Insets(0, 0, 0, 0), 0, 0))

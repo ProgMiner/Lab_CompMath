@@ -1,7 +1,7 @@
 package ru.byprogminer.compmath.lab4
 
-import ru.byprogminer.compmath.lab4.equation.Expression
-import ru.byprogminer.compmath.lab4.equation.InvalidExpression
+import ru.byprogminer.compmath.lab4.expression.Expression
+import ru.byprogminer.compmath.lab4.expression.InvalidExpression
 import ru.byprogminer.compmath.lab4.gui.MainWindow
 import ru.byprogminer.compmath.lab4.gui.util.randomColor
 import ru.byprogminer.compmath.lab4.util.EventManager

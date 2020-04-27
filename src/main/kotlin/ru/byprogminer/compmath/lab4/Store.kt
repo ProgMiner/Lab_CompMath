@@ -1,6 +1,6 @@
 package ru.byprogminer.compmath.lab4
 
-import ru.byprogminer.compmath.lab4.equation.Expression
+import ru.byprogminer.compmath.lab4.expression.Expression
 import java.awt.Color
 
 data class Store(

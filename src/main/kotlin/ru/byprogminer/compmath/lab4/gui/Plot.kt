@@ -205,7 +205,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
 
         // Plots
         if (store.plotAbscissaVariable != null) {
-            val equations = listOf(
+            val functions = listOf(
                     store.function to store.functionColor,
                     store.interpolation to store.interpolationColor
             ).filter { eq -> try {
@@ -220,11 +220,11 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
 
             val realXStep = 1 / zoomX
             val futures = mutableListOf<CompletableFuture<Void>>()
-            for ((equation, color) in equations) {
+            for ((function, color) in functions) {
                 futures.add(CompletableFuture.runAsync {
                     if (graphics is Graphics2D) {
                         val points = (0 until width).map { x ->
-                            x to equation.evaluate(mapOf(
+                            x to function.evaluate(mapOf(
                                     store.plotAbscissaVariable to (store.plotAbscissaBegin ?: .0) + x * realXStep
                             ))
                         }.map { (x, realY) ->
@@ -312,7 +312,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
                         for (x in 0 until width) {
                             realX += realXStep
 
-                            val realResult = equation.evaluate(mapOf(store.plotAbscissaVariable to realX))
+                            val realResult = function.evaluate(mapOf(store.plotAbscissaVariable to realX))
 
                             synchronized(graphics) {
                                 val actualPrevY = prevY

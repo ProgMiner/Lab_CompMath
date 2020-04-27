@@ -3,23 +3,23 @@ package ru.byprogminer.compmath.lab4.parser
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.tree.ParseTreeWalker
-import ru.byprogminer.compmath.lab4.equation.Expression
-import ru.byprogminer.compmath.lab4.equation.InterpretingExpression
-import ru.byprogminer.compmath.lab4.equation.InvalidExpression
+import ru.byprogminer.compmath.lab4.expression.Expression
+import ru.byprogminer.compmath.lab4.expression.InterpretingExpression
+import ru.byprogminer.compmath.lab4.expression.InvalidExpression
 
-fun parse(equation: String): Expression = try {
-    val cst = parseEquation(equation)
+fun parse(expression: String): Expression = try {
+    val cst = parseExpression(expression)
 
     val variablesSearchListener = VariablesSearchListener()
     ParseTreeWalker().walk(variablesSearchListener, cst)
 
-    InterpretingExpression(equation, variablesSearchListener.variables, cst)
+    InterpretingExpression(expression, variablesSearchListener.variables, cst)
 } catch (e: Exception) {
-    InvalidExpression(equation)
+    InvalidExpression(expression)
 }
 
-private fun parseEquation(equation: String): ExpressionParser.ExpressionContext {
-    val lexer = ExpressionLexer(CharStreams.fromString(equation))
+private fun parseExpression(expression: String): ExpressionParser.ExpressionContext {
+    val lexer = ExpressionLexer(CharStreams.fromString(expression))
 
     lexer.removeErrorListeners()
     lexer.addErrorListener(ThrowingErrorListener())

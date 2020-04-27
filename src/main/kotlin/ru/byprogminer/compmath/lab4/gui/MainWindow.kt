@@ -369,10 +369,10 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
             onStoreChangeRun = true
 
             // function
-            val equationValid = store.function.toString().trim() == "" || store.variables.size == 1
+            val functionValid = store.function.toString().trim() == "" || store.variables.size == 1
 
             functionsFunctionField.background = when {
-                equationValid -> defaultTextFieldBackgroundColor
+                functionValid -> defaultTextFieldBackgroundColor
                 else -> INVALID_VALUE_COLOR
             }
 

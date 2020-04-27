@@ -1,4 +1,4 @@
-package ru.byprogminer.compmath.lab4.equation
+package ru.byprogminer.compmath.lab4.expression
 
 abstract class DefaultExpression(
         expression: String,

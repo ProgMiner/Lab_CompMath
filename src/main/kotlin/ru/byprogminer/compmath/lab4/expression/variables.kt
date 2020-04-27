@@ -1,6 +1,4 @@
-package ru.byprogminer.compmath.lab4.math
-
-import ru.byprogminer.compmath.lab4.equation.Expression
+package ru.byprogminer.compmath.lab4.expression
 
 val Collection<Expression>.variables: Set<String> get() {
 

@@ -1,6 +1,6 @@
 package ru.byprogminer.compmath.lab4.math
 
-import ru.byprogminer.compmath.lab4.equation.Expression
+import ru.byprogminer.compmath.lab4.expression.Expression
 
 interface InterpolationMethod {
 

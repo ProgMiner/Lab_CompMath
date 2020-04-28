@@ -12,6 +12,11 @@ import javax.swing.JPanel
 import javax.swing.SwingUtilities
 import kotlin.math.*
 
+/**
+ * Interactive component for rendering plots
+ *
+ * @author Eridan Domoratskiy
+ */
 class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentListener,
         MouseListener, MouseMotionListener, MouseWheelListener {
 
@@ -118,11 +123,12 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
                 val (realFunctionY, realInterpolationY) = realY
 
                 val y = listOf(
-                        abs(realFunctionY) to (centerY + realFunctionY * zoomY).toInt(),
-                        abs(realInterpolationY) to (centerY + realInterpolationY * zoomY).toInt()
-                ).maxBy { (abs, _) -> abs }!!.second
+                        centerY.toInt(),
+                        (centerY + realFunctionY * zoomY).toInt(),
+                        (centerY + realInterpolationY * zoomY).toInt()
+                )
 
-                graphics.drawLine(x, centerY.toInt(), x, y)
+                graphics.drawLine(x, y.min()!!, x, y.max()!!)
             }
 
             if (graphics is Graphics2D) {
@@ -228,15 +234,12 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
                     store.interpolation to store.interpolationColor
             ).filter { (eq, _) -> eq.isValid && eq.variables.size == 1 }
 
-            if (graphics is Graphics2D) {
-                graphics.stroke = BasicStroke(2f)
-            }
-
             val realXStep = 1 / zoomX
-            val futures = mutableListOf<CompletableFuture<Void>>()
-            for ((function, color) in functions) {
-                futures.add(CompletableFuture.runAsync {
-                    if (graphics is Graphics2D) {
+            if (graphics is Graphics2D) {
+                val futures = mutableListOf<CompletableFuture<Pair<Path2D, Color>>>()
+
+                for ((function, color) in functions) {
+                    futures.add(CompletableFuture.supplyAsync {
                         val points = (0 until width).asSequence().map { x ->
                             x to function.evaluate(mapOf(
                                     store.plotAbscissaVariable to (store.plotAbscissaBegin ?: .0) + x * realXStep
@@ -320,11 +323,30 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
                             path.quadTo(x, y, curX, curY)
                         }
 
-                        synchronized(graphics) {
-                            graphics.color = color
-                            graphics.draw(path)
-                        }
-                    } else {
+                        return@supplyAsync path to color
+                    })
+                }
+
+                CompletableFuture.allOf(*futures.toTypedArray()).join()
+                graphics.stroke = BasicStroke(2f)
+
+                for (future in futures) {
+                    val (path, color) = future.get()
+
+                    graphics.color = color
+                    graphics.draw(path)
+                }
+
+                graphics.stroke = BasicStroke(1f)
+            } else {
+                val futures = mutableListOf<CompletableFuture<Void>>()
+
+                if (graphics is Graphics2D) {
+                    graphics.stroke = BasicStroke(2f)
+                }
+
+                for ((function, color) in functions) {
+                    futures.add(CompletableFuture.runAsync {
                         var realX = store.plotAbscissaBegin ?: .0
                         var prevY: Int? = null
 
@@ -348,14 +370,14 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
                                 }
                             }
                         }
-                    }
-                })
-            }
+                    })
+                }
 
-            CompletableFuture.allOf(*futures.toTypedArray()).join()
+                CompletableFuture.allOf(*futures.toTypedArray()).join()
 
-            if (graphics is Graphics2D) {
-                graphics.stroke = BasicStroke(1f)
+                if (graphics is Graphics2D) {
+                    graphics.stroke = BasicStroke(1f)
+                }
             }
         }
 

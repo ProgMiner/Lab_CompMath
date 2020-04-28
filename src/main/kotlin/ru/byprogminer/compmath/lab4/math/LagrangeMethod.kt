@@ -31,27 +31,29 @@ object LagrangeMethod: InterpolationMethod {
             val f = values.map { it.toPlainString() }
             val x = points.map { it.toPlainString() }
 
-            f.indices.joinToString(" + ") { i -> "${f[i]} * " + x.indices
+            return@lazy f.indices.joinToString(" + ") { i -> "${f[i]} * " + x.indices
                     .filter { j -> j != i }.joinToString(" * ") { j ->
                         "(x - ${x[j]}) / (${x[i]} - ${x[j]})"
                     }
             }
         }
 
-        private val denominator: List<List<Double>> = listOf()
+        private val denominators: List<Double>
 
         init {
-            // TODO
+            denominators = this.values.indices.map { i ->
+                points.indices.filter { j -> j != i }
+                        .map { j -> points[i] - points[j] }
+                        .reduce { a, b -> a * b }
+            }
         }
 
         override fun evaluate(values: Map<String, Double>): Double {
             val x = values.getValue(variables.first())
 
-            return this.values.mapIndexed { i, f ->
-                f * points.indices.filter { j -> j != i }
-                        .map { j -> (x - points[j]) / (points[i] - points[j]) }
-                        .reduce { a, b -> a * b }
-            }.sum()
+            return this.values.mapIndexed { i, f -> f * points.indices
+                    .filter { j -> j != i }.map { j -> (x - points[j]) }
+                    .reduce { a, b -> a * b } / denominators[i] }.sum()
         }
 
         override fun toString() = view

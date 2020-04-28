@@ -101,11 +101,11 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
 
         functionsInterpolationLabel.font = computerModernFont
         functionsInterpolationLabel.horizontalAlignment = JLabel.RIGHT
-        functionsPanel.add(functionsInterpolationLabel, GridBagConstraints(0, 1, 1, 1, .0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 5), 0, 0))
+        functionsPanel.add(functionsInterpolationLabel, GridBagConstraints(0, 1, 1, 1, .0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 5), 0, 0))
 
         functionsInterpolationField.isEditable = false
         functionsInterpolationField.font = computerModernFont
-        functionsPanel.add(functionsInterpolationField, GridBagConstraints(1, 1, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 5), 0, 0))
+        functionsPanel.add(functionsInterpolationField, GridBagConstraints(1, 1, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 5), 0, 0))
 
         functionsInterpolationColorButton.preferredSize = Dimension(20, 20)
         functionsInterpolationColorButton.minimumSize = Dimension(20, 20)
@@ -115,7 +115,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
                 store.mutateIfOther { store -> store.copy(interpolationColor = newColor) }
             }
         }
-        functionsPanel.add(functionsInterpolationColorButton, GridBagConstraints(2, 1, 1, 1, .0, .0, GridBagConstraints.BASELINE, GridBagConstraints.NONE, Insets(0, 0, 5, 0), 0, 0))
+        functionsPanel.add(functionsInterpolationColorButton, GridBagConstraints(2, 1, 1, 1, .0, .0, GridBagConstraints.BASELINE, GridBagConstraints.NONE, Insets(0, 0, 0, 0), 0, 0))
         controlPanel.add(functionsPanel, GridBagConstraints(0, 0, 1, 1, .0, .0, GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 0), 0, 0))
         controlPanel.add(JSeparator(JSeparator.HORIZONTAL), GridBagConstraints(0, 1, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 0), 0, 0))
 
@@ -174,7 +174,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         interpolationPointsTable.rowHeight = 24
         interpolationPointsTable.tableHeader = null
         interpolationPointsTablePane.preferredSize = Dimension(150, 200)
-        interpolationPointsPanel.add(interpolationPointsTablePane, GridBagConstraints(0, 1, 3, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 5, 0), 0, 0))
+        interpolationPointsPanel.add(interpolationPointsTablePane, GridBagConstraints(0, 1, 3, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 0, 0), 0, 0))
         controlPanel.add(interpolationPointsPanel, GridBagConstraints(0, 2, 1, 1, .0, 1.0, GridBagConstraints.WEST, GridBagConstraints.BOTH, Insets(0, 0, 5, 0), 0, 0))
         controlPanel.add(JSeparator(JSeparator.HORIZONTAL), GridBagConstraints(0, 3, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 0), 0, 0))
 
@@ -232,8 +232,8 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         }
         valuesTable.rowHeight = 24
         valuesTablePane.preferredSize = Dimension(150, 300)
-        valuesPanel.add(valuesTablePane, GridBagConstraints(0, 1, 3, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 5, 0), 0, 0))
-        controlPanel.add(valuesPanel, GridBagConstraints(0, 4, 1, 1, .0, 1.68, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 5, 0), 0, 0))
+        valuesPanel.add(valuesTablePane, GridBagConstraints(0, 1, 3, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 0, 0), 0, 0))
+        controlPanel.add(valuesPanel, GridBagConstraints(0, 4, 1, 1, .0, 1.68, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 0, 0), 0, 0))
         _contentPane.add(controlPanel, GridBagConstraints(0, 0, 1, 1, .0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.VERTICAL, Insets(0, 0, 0, 5), 0, 0))
 
         plotPlot.font = computerModernFont
@@ -349,7 +349,6 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         plotButtonsPanel.add(plotButtonsFitButton, GridBagConstraints(0, 0, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 0), 0, 0))
 
         plotPanel.add(plotButtonsPanel, GridBagConstraints(6, 1, 1, 3, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 0, 0), 0, 0))
-        plotPanel.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
 
         _contentPane.add(plotPanel, GridBagConstraints(1, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 0, 0), 0, 0))
         _contentPane.border = BorderFactory.createEmptyBorder(5, 5, 5, 5)

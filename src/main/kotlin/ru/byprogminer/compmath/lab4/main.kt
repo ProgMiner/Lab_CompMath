@@ -21,13 +21,14 @@ fun main() {
     @Suppress("RemoveExplicitTypeArguments") val store = reactiveHolder(Store(
             InvalidExpression(""),
             exprColor,
+            null,
 
             InvalidExpression(""),
             Color(255 - exprColor.red, 255 - exprColor.green, 255 - exprColor.blue),
             emptyList(),
+            null,
 
             emptyList(),
-            null,
 
             null,
             -100.0,
@@ -53,10 +54,9 @@ fun main() {
         }
 
         if (st.function != oldStore.function || st.interpolationPoints != oldStore.interpolationPoints) {
-            storeHolder.mutateIfOther { s -> s.copy(
-                    interpolation = InvalidExpression(""),
-                    values = null
-            ) }
+            storeHolder.mutateIfOther { s ->
+                s.copy(interpolation = InvalidExpression(""))
+            }
 
             thread {
                 if (!st.function.isValid || st.function.variables.size != 1) {
@@ -70,19 +70,44 @@ fun main() {
             }
         }
 
+        if (st.function != oldStore.function || st.valuePoints != oldStore.valuePoints) {
+            storeHolder.mutateIfOther { s ->
+                s.copy(functionValues = null)
+            }
+
+            thread {
+                if (!st.function.isValid) {
+                    return@thread
+                }
+
+                val variable = st.function.variables.first()
+                val values = st.valuePoints.map { point ->
+                    point to st.function.evaluate(mapOf(variable to point))
+                }.toMap()
+
+                storeHolder.mutateIfOther { s ->
+                    s.copy(functionValues = values)
+                }
+            }
+        }
+
         if (st.interpolation != oldStore.interpolation || st.valuePoints != oldStore.valuePoints) {
+            storeHolder.mutateIfOther { s ->
+                s.copy(interpolationValues = null)
+            }
+
             thread {
                 if (!st.interpolation.isValid) {
                     return@thread
                 }
 
-                val pointValues = st.valuePoints.map { point ->
-                    point to (st.function.evaluate(mapOf(st.function.variables.first() to point)) to
-                            st.interpolation.evaluate(mapOf(st.function.variables.first() to point)))
+                val variable = st.function.variables.first()
+                val values = st.valuePoints.map { point ->
+                    point to st.interpolation.evaluate(mapOf(variable to point))
                 }.toMap()
 
                 storeHolder.mutateIfOther { s ->
-                    s.copy(values = pointValues)
+                    s.copy(interpolationValues = values)
                 }
             }
         }

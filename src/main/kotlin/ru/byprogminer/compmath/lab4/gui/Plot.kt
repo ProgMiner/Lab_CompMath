@@ -114,26 +114,22 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
             }
         }
 
-        // Lines to interpolation and values points
-        if (store.plotAbscissaVariable != null && !store.values.isNullOrEmpty()) {
-            graphics.color = POINTS_COLOR
+        // TODO lines to interpolation points
 
-            for ((realX, realY) in store.values) {
-                val x = (centerX + realX * zoomX).toInt()
-                val (realFunctionY, realInterpolationY) = realY
+        // Lines to values points
+        graphics.color = POINTS_COLOR
+        for (realX in store.valuePoints) {
+            val x = (centerX + realX * zoomX).toInt()
+            val realFunctionY = store.functionValues?.get(realX) ?: .0
+            val realInterpolationY = store.interpolationValues?.get(realX) ?: .0
 
-                val y = listOf(
-                        centerY.toInt(),
-                        (centerY + realFunctionY * zoomY).toInt(),
-                        (centerY + realInterpolationY * zoomY).toInt()
-                )
+            val y = sortedSetOf(
+                    centerY.toInt(),
+                    (centerY + realFunctionY * zoomY).toInt(),
+                    (centerY + realInterpolationY * zoomY).toInt()
+            )
 
-                graphics.drawLine(x, y.min()!!, x, y.max()!!)
-            }
-
-            if (graphics is Graphics2D) {
-                graphics.stroke = BasicStroke(1f)
-            }
+            graphics.drawLine(x, y.first(), x, y.last())
         }
 
         // Grid text
@@ -381,26 +377,21 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
             }
         }
 
-        // Points
-        if (store.plotAbscissaVariable != null && !store.values.isNullOrEmpty()) {
-            for ((realX, realY) in store.values) {
-                val (realFunctionY, realInterpolationY) = realY
-                val x = (centerX + realX * zoomX).toInt()
+        // Value points
+        for (realX in store.valuePoints) {
+            val x = (centerX + realX * zoomX).toInt()
 
-                listOf(
-                        (centerY + realFunctionY * zoomY).toInt() to store.functionColor,
-                        (centerY + realInterpolationY * zoomY).toInt() to store.interpolationColor
-                ).forEach { (y, color) ->
-                    graphics.color = POINTS_COLOR
-                    graphics.fillArc(x - 3, y - 3, 7, 7, 0, 360)
+            listOf(
+                    store.functionValues?.get(realX) to store.functionColor,
+                    store.interpolationValues?.get(realX) to store.interpolationColor
+            ).filter { (realY, _) -> realY != null }.map { (realY, color) ->
+                (centerY + realY!! * zoomY).toInt() to color
+            }.forEach { (y, color) ->
+                graphics.color = POINTS_COLOR
+                graphics.fillArc(x - 3, y - 3, 7, 7, 0, 360)
 
-                    graphics.color = color
-                    graphics.fillArc(x - 2, y - 2, 5, 5, 0, 360)
-                }
-            }
-
-            if (graphics is Graphics2D) {
-                graphics.stroke = BasicStroke(1f)
+                graphics.color = color
+                graphics.fillArc(x - 2, y - 2, 5, 5, 0, 360)
             }
         }
 

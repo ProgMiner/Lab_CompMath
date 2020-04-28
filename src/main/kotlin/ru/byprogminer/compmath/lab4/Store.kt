@@ -6,13 +6,14 @@ import java.awt.Color
 data class Store(
         val function: Expression,
         val functionColor: Color,
+        val functionValues: Map<Double, Double>?,
 
         val interpolation: Expression,
         val interpolationColor: Color,
         val interpolationPoints: List<Double>,
+        val interpolationValues: Map<Double, Double>?,
 
         val valuePoints: List<Double>,
-        val values: Map<Double, Pair<Double, Double>>?,
 
         val plotAbscissaVariable: String?,
         val plotAbscissaBegin: Double?,

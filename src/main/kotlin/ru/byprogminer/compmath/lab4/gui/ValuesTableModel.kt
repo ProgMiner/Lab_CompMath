@@ -14,10 +14,14 @@ class ValuesTableModel(private val storeHolder: ReactiveHolder<Store>): Abstract
         storeHolder.onChange.listeners.add { oldStore ->
             val store = storeHolder.get()
 
-            if (store.valuePoints != oldStore.valuePoints || store.values != oldStore.values) {
+            if (
+                    store.functionValues != oldStore.functionValues ||
+                    store.interpolationValues != oldStore.interpolationValues ||
+                    store.valuePoints != oldStore.valuePoints
+            ) {
                 val rows = store.valuePoints.map { point -> listOf(point.toPlainString(),
-                        store.values?.get(point)?.first?.toPlainString() ?: "",
-                        store.values?.get(point)?.second?.toPlainString() ?: "") }
+                        store.functionValues?.get(point)?.toPlainString() ?: "",
+                        store.interpolationValues?.get(point)?.toPlainString() ?: "") }
 
                 if (rows != this.rows) {
                     SwingUtilities.invokeLater {

@@ -119,16 +119,18 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
 
         // Lines to interpolation points
         if (store.function.isValid && store.function.variables.size == 1) {
+            val variable = store.function.variables.first()
+
             for (realX in store.interpolationPoints) {
                 val x = (centerX + realX * zoomX).toInt()
+                val fv = mapOf(variable to realX)
 
-                val variable = store.function.variables.first()
-                val functionsY = listOf(store.function, store.interpolation).filter { f -> f.isValid }
-                        .map { f -> f.evaluate(mapOf(variable to realX)) }
+                val functionsY = listOf(store.function, store.interpolation)
+                        .filter { f -> f.isValid }.map { f -> f.evaluate(fv) }
                         .map { realY -> (centerY + realY * zoomY).toInt() }
 
                 val y = (listOf(centerY.toInt()) + functionsY).toSortedSet()
-                graphics.drawLine(x, y.first(), x, y.last())
+                graphics.drawLine(x, max(y.first(), 0), x, min(y.last(), height))
             }
         }
 
@@ -145,7 +147,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
                     (centerY + realInterpolationY * zoomY).toInt()
             )
 
-            graphics.drawLine(x, y.first(), x, y.last())
+            graphics.drawLine(x, max(y.first(), 0), x, min(y.last(), height))
         }
 
         // Grid text
@@ -390,6 +392,19 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
                 if (graphics is Graphics2D) {
                     graphics.stroke = BasicStroke(1f)
                 }
+            }
+        }
+
+        // Interpolation points
+        if (store.function.isValid && store.function.variables.size == 1) {
+            val variable = store.function.variables.first()
+
+            for (realX in store.interpolationPoints) {
+                val x = (centerX + realX * zoomX).toInt()
+                val y = (centerY + store.function.evaluate(mapOf(variable to realX)) * zoomY).toInt()
+
+                graphics.color = POINTS_COLOR
+                graphics.fillArc(x - 2, y - 2, 5, 5, 0, 360)
             }
         }
 

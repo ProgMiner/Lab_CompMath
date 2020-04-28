@@ -2,6 +2,8 @@ package ru.byprogminer.compmath.lab4.expression
 
 class InvalidExpression(expression: String): AbstractExpression(expression) {
 
+    override val isValid = false
+
     override val variables
         get() = throw UnsupportedOperationException("expression is invalid")
 

@@ -85,7 +85,6 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
         val centerY = -(store.plotOrdinateEnd ?: .0) * zoomY
 
         // Grid
-
         val realGridStep = max(roundGridStep(intervalX / 10.0), roundGridStep(intervalY / 10.0))
         if (realGridStep != .0) {
 
@@ -208,11 +207,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
             val functions = listOf(
                     store.function to store.functionColor,
                     store.interpolation to store.interpolationColor
-            ).filter { eq -> try {
-                return@filter eq.first.variables.size == 1
-            } catch (e: UnsupportedOperationException) {
-                return@filter false
-            } }
+            ).filter { (eq, _) -> eq.isValid && eq.variables.size == 1 }
 
             if (graphics is Graphics2D) {
                 graphics.stroke = BasicStroke(2f)
@@ -346,7 +341,6 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
         }
 
         // Points
-
         if (store.plotAbscissaVariable != null && !store.values.isNullOrEmpty()) {
             graphics.color = POINTS_COLOR
 

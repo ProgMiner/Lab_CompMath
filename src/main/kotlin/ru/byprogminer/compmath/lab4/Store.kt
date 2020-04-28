@@ -22,11 +22,9 @@ data class Store(
 ) {
 
     val variables: Set<String>
-        get() = try {
+        get() = if (function.isValid) {
             function.variables
-        } catch (e: UnsupportedOperationException) {
-            // Dummy Kotlin
-            @Suppress("RemoveExplicitTypeArguments")
-            emptySet<String>()
+        } else {
+            emptySet()
         }
 }

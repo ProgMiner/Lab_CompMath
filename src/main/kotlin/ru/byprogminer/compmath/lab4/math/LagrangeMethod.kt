@@ -24,6 +24,7 @@ object LagrangeMethod: InterpolationMethod {
             variable: String
     ): Expression {
 
+        override val isValid = true
         override val variables = setOf(variable)
 
         private val view by lazy {

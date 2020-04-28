@@ -59,11 +59,7 @@ fun main() {
             ) }
 
             thread {
-                try {
-                    if (st.function.variables.size != 1) {
-                        return@thread
-                    }
-                } catch (e: UnsupportedOperationException) {
+                if (!st.function.isValid || st.function.variables.size != 1) {
                     return@thread
                 }
 

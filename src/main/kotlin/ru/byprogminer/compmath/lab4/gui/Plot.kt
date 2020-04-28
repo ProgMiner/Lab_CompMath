@@ -114,10 +114,26 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
             }
         }
 
-        // TODO lines to interpolation points
+        // Lines to points
+        graphics.color = POINTS_COLOR
+
+        // Lines to interpolation points
+        if (store.function.isValid && store.function.variables.size == 1) {
+            for (realX in store.interpolationPoints) {
+                val x = (centerX + realX * zoomX).toInt()
+
+                val variable = store.function.variables.first()
+                val functionsY = listOf(store.function, store.interpolation).filter { f -> f.isValid }
+                        .map { f -> f.evaluate(mapOf(variable to realX)) }
+                        .map { realY -> (centerY + realY * zoomY).toInt() }
+
+                val y = (listOf(centerY.toInt()) + functionsY).toSortedSet()
+                graphics.drawLine(x, y.first(), x, y.last())
+            }
+        }
+
 
         // Lines to values points
-        graphics.color = POINTS_COLOR
         for (realX in store.valuePoints) {
             val x = (centerX + realX * zoomX).toInt()
             val realFunctionY = store.functionValues?.get(realX) ?: .0
@@ -228,7 +244,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
             val functions = listOf(
                     store.function to store.functionColor,
                     store.interpolation to store.interpolationColor
-            ).filter { (eq, _) -> eq.isValid && eq.variables.size == 1 }
+            ).filter { (f, _) -> f.isValid && f.variables.size == 1 }
 
             val realXStep = 1 / zoomX
             if (graphics is Graphics2D) {

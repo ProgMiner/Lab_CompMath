@@ -383,7 +383,9 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
             functionsFunctionColorButton.icon = ColorIconFactory.getIcon(store.functionColor)
 
             // interpolation
-            functionsInterpolationField.text = store.interpolation.toString()
+            if (functionsInterpolationField.text != store.interpolation.toString()) {
+                functionsInterpolationField.text = store.interpolation.toString()
+            }
 
             // interpolationColor
             functionsInterpolationColorButton.icon = ColorIconFactory.getIcon(store.interpolationColor)

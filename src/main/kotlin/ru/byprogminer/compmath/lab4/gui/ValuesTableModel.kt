@@ -16,8 +16,8 @@ class ValuesTableModel(private val storeHolder: ReactiveHolder<Store>): Abstract
 
             if (store.valuePoints != oldStore.valuePoints || store.values != oldStore.values) {
                 val rows = store.valuePoints.map { point -> listOf(point.toPlainString(),
-                        store.values?.getValue(point)?.first?.toPlainString() ?: "",
-                        store.values?.getValue(point)?.second?.toPlainString() ?: "") }
+                        store.values?.get(point)?.first?.toPlainString() ?: "",
+                        store.values?.get(point)?.second?.toPlainString() ?: "") }
 
                 if (rows != this.rows) {
                     SwingUtilities.invokeLater {

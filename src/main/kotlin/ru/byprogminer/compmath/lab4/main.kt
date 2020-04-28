@@ -65,15 +65,24 @@ fun main() {
 
                 val interpolation = LagrangeMethod.interpolate(st.function, st.interpolationPoints.toSet())
                 storeHolder.mutateIfOther { s ->
-                    val pointValues = s.valuePoints.map { point ->
-                        point to (st.function.evaluate(mapOf(st.function.variables.first() to point)) to
-                                interpolation.evaluate(mapOf(st.function.variables.first() to point)))
-                    }.toMap()
+                    s.copy(interpolation = interpolation)
+                }
+            }
+        }
 
-                    s.copy(
-                            interpolation = interpolation,
-                            values = pointValues
-                    )
+        if (st.interpolation != oldStore.interpolation || st.valuePoints != oldStore.valuePoints) {
+            thread {
+                if (!st.interpolation.isValid) {
+                    return@thread
+                }
+
+                val pointValues = st.valuePoints.map { point ->
+                    point to (st.function.evaluate(mapOf(st.function.variables.first() to point)) to
+                            st.interpolation.evaluate(mapOf(st.function.variables.first() to point)))
+                }.toMap()
+
+                storeHolder.mutateIfOther { s ->
+                    s.copy(values = pointValues)
                 }
             }
         }

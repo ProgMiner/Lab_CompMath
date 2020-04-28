@@ -127,7 +127,11 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
 
                 val functionsY = listOf(store.function, store.interpolation)
                         .filter { f -> f.isValid }.map { f -> f.evaluate(fv) }
-                        .map { realY -> (centerY + realY * zoomY).toInt() }
+                        .filter(Double::isFinite).map { realY -> (centerY + realY * zoomY).toInt() }
+
+                if (functionsY.isEmpty()) {
+                    continue
+                }
 
                 val y = (listOf(centerY.toInt()) + functionsY).toSortedSet()
                 graphics.drawLine(x, max(y.first(), 0), x, min(y.last(), height))
@@ -141,13 +145,17 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
             val realFunctionY = store.functionValues?.get(realX) ?: .0
             val realInterpolationY = store.interpolationValues?.get(realX) ?: .0
 
-            val y = sortedSetOf(
-                    centerY.toInt(),
-                    (centerY + realFunctionY * zoomY).toInt(),
-                    (centerY + realInterpolationY * zoomY).toInt()
-            )
+            val y = listOf(
+                    centerY,
+                    centerY + realFunctionY * zoomY,
+                    centerY + realInterpolationY * zoomY
+            ).filter(Double::isFinite).toSortedSet()
 
-            graphics.drawLine(x, max(y.first(), 0), x, min(y.last(), height))
+            if (y.size < 2) {
+                continue
+            }
+
+            graphics.drawLine(x, max(y.first().toInt(), 0), x, min(y.last().toInt(), height))
         }
 
         // Grid text
@@ -400,11 +408,14 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
             val variable = store.function.variables.first()
 
             for (realX in store.interpolationPoints) {
-                val x = (centerX + realX * zoomX).toInt()
-                val y = (centerY + store.function.evaluate(mapOf(variable to realX)) * zoomY).toInt()
+                val y = centerY + store.function.evaluate(mapOf(variable to realX)) * zoomY
+
+                if (!y.isFinite()) {
+                    continue
+                }
 
                 graphics.color = POINTS_COLOR
-                graphics.fillArc(x - 2, y - 2, 5, 5, 0, 360)
+                graphics.fillArc((centerX + realX * zoomX - 2).toInt(), (y - 2).toInt(), 5, 5, 0, 360)
             }
         }
 
@@ -415,7 +426,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
             listOf(
                     store.functionValues?.get(realX) to store.functionColor,
                     store.interpolationValues?.get(realX) to store.interpolationColor
-            ).filter { (realY, _) -> realY != null }.map { (realY, color) ->
+            ).filter { (realY, _) -> realY != null && realY.isFinite() }.map { (realY, color) ->
                 (centerY + realY!! * zoomY).toInt() to color
             }.forEach { (y, color) ->
                 graphics.color = POINTS_COLOR

@@ -1,4 +1,4 @@
-package ru.byprogminer.compmath.lab4.util
+package ru.byprogminer.compmath.lab5.util
 
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -17,3 +17,6 @@ fun Double.toPlainString(scale: Int = 12): String {
             .stripTrailingZeros()
             .toPlainString()
 }
+
+fun Double?.toPlainString(scale: Int): String? = this?.toPlainString(scale)
+fun Double?.toPlainString(): String? = this?.toPlainString()

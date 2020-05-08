@@ -1,8 +1,8 @@
-package ru.byprogminer.compmath.lab4.gui
+package ru.byprogminer.compmath.lab5.gui
 
-import ru.byprogminer.compmath.lab4.Store
-import ru.byprogminer.compmath.lab4.util.ReactiveHolder
-import ru.byprogminer.compmath.lab4.util.toPlainString
+import ru.byprogminer.compmath.lab5.Store
+import ru.byprogminer.compmath.lab5.util.ReactiveHolder
+import ru.byprogminer.compmath.lab5.util.toPlainString
 import java.awt.*
 import java.awt.event.*
 import java.awt.geom.Path2D
@@ -114,48 +114,19 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
             }
         }
 
-        // Lines to points
+        // Lines to derivative points
         graphics.color = POINTS_COLOR
-
-        // Lines to interpolation points
-        if (store.function.isValid && store.function.variables.size == 1) {
-            val variable = store.function.variables.first()
-
-            for (realX in store.interpolationPoints) {
+        if (store.derivativePoints != null) {
+            for ((realX, realY) in store.derivativePoints) {
                 val x = (centerX + realX * zoomX).toInt()
-                val fv = mapOf(variable to realX)
 
-                val functionsY = listOf(store.function, store.interpolation)
-                        .filter { f -> f.isValid }.map { f -> f.evaluate(fv) }
-                        .filter(Double::isFinite).map { realY -> (centerY + realY * zoomY).toInt() }
+                val y = sortedSetOf(
+                        centerY.toInt(),
+                        (centerY + realY * zoomY).toInt()
+                )
 
-                if (functionsY.isEmpty()) {
-                    continue
-                }
-
-                val y = (listOf(centerY.toInt()) + functionsY).toSortedSet()
                 graphics.drawLine(x, max(y.first(), 0), x, min(y.last(), height))
             }
-        }
-
-
-        // Lines to values points
-        for (realX in store.valuePoints) {
-            val x = (centerX + realX * zoomX).toInt()
-            val realFunctionY = store.functionValues?.get(realX) ?: .0
-            val realInterpolationY = store.interpolationValues?.get(realX) ?: .0
-
-            val y = listOf(
-                    centerY,
-                    centerY + realFunctionY * zoomY,
-                    centerY + realInterpolationY * zoomY
-            ).filter(Double::isFinite).toSortedSet()
-
-            if (y.size < 2) {
-                continue
-            }
-
-            graphics.drawLine(x, max(y.first().toInt(), 0), x, min(y.last().toInt(), height))
         }
 
         // Grid text
@@ -250,189 +221,166 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
         }
 
         // Plots
-        if (store.plotAbscissaVariable != null) {
-            val functions = listOf(
-                    store.function to store.functionColor,
-                    store.interpolation to store.interpolationColor
-            ).filter { (f, _) -> f.isValid && f.variables.size == 1 }
+        val functions = listOf(
+                store.derivativeInterpolation to store.derivativeInterpolationColor
+        ).filter { (f, _) -> f.isValid }
 
-            val realXStep = 1 / zoomX
+        val realXStep = 1 / zoomX
+        if (graphics is Graphics2D) {
+            val futures = mutableListOf<CompletableFuture<Pair<Path2D, Color>>>()
+
+            for ((function, color) in functions) {
+                futures.add(CompletableFuture.supplyAsync {
+                    val points = (0 until width).asSequence().map { x ->
+                        x to function.evaluate(mapOf(
+                                Store.ABSCISSA_VARIABLE to (store.plotAbscissaBegin ?: .0) + x * realXStep
+                        ))
+                    }.map { (x, realY) ->
+                        x.toDouble() to if (realY.isFinite()) {
+                            centerY + realY * zoomY
+                        } else {
+                            null
+                        }
+                    }.map { (x, y) ->
+                        x to when (y) {
+                            null -> null
+                            else -> min(max(y, .0 - height), .0 + 2 * height)
+                        }
+                    }.map(::listOf).reduce { acc, current ->
+                        val (currentX, currentY) = current[0]
+
+                        if (acc.size == 1) {
+                            return@reduce acc + current
+                        }
+
+                        val (prevX, prevY) = acc.last()
+                        val subAcc = acc.subList(0, acc.lastIndex)
+                        if (currentY == null && prevY == null) {
+                            return@reduce subAcc + current
+                        }
+
+                        val (prevPrevX, prevPrevY) = acc[acc.size - 2]
+                        if (currentY == null || prevY == null || prevPrevY == null) {
+                            return@reduce acc + current
+                        }
+
+                        val isOnLine = abs((currentX - prevPrevX) * (prevY - prevPrevY) /
+                                (prevX - prevPrevX) + prevPrevY - currentY) < 0.01
+
+                        return@reduce if (isOnLine) {
+                            subAcc + current
+                        } else {
+                            acc + current
+                        }
+                    }.toList()
+
+                    val path = Path2D.Double()
+                    for (i in points.indices) {
+                        val prev = points.getOrNull(i - 1)
+                        val cur = points[i]
+
+                        val (curX, curY) = cur
+                        if (prev?.second == null || curY == null) {
+                            if (curY != null) {
+                                path.moveTo(curX, curY)
+                                path.lineTo(curX, curY)
+                            }
+
+                            continue
+                        }
+
+                        val next = points.getOrNull(i + 1)
+                        val prevPrev = points.getOrNull(i - 2)
+                        val (prevX, prevY) = prev.first to prev.second!!
+                        if (prevPrev?.second == null || next?.second == null) {
+                            path.lineTo(curX, curY)
+                            continue
+                        }
+
+                        val (prevPrevX, prevPrevY) = prevPrev.first to prevPrev.second!!
+                        val (nextX, nextY) = next.first to next.second!!
+
+                        val a = (nextY - curY) / (nextX - curX)
+                        val b = (prevY - prevPrevY) / (prevX - prevPrevX)
+
+                        val y = (curY + a * (prevPrevX - curX - prevPrevY / b)) / (1 - a / b)
+                        val x = (y - prevPrevY) / b + prevPrevX
+
+                        if (x < prevX || x > curX || y < prevY || y > curY) {
+                            path.lineTo(curX, curY)
+                            continue
+                        }
+
+                        path.quadTo(x, y, curX, curY)
+                    }
+
+                    return@supplyAsync path to color
+                })
+            }
+
+            CompletableFuture.allOf(*futures.toTypedArray()).join()
+            graphics.stroke = BasicStroke(2f)
+
+            for (future in futures) {
+                val (path, color) = future.get()
+
+                graphics.color = color
+                graphics.draw(path)
+            }
+
+            graphics.stroke = BasicStroke(1f)
+        } else {
+            val futures = mutableListOf<CompletableFuture<Void>>()
+
             if (graphics is Graphics2D) {
-                val futures = mutableListOf<CompletableFuture<Pair<Path2D, Color>>>()
-
-                for ((function, color) in functions) {
-                    futures.add(CompletableFuture.supplyAsync {
-                        val points = (0 until width).asSequence().map { x ->
-                            x to function.evaluate(mapOf(
-                                    store.plotAbscissaVariable to (store.plotAbscissaBegin ?: .0) + x * realXStep
-                            ))
-                        }.map { (x, realY) ->
-                            x.toDouble() to if (realY.isFinite()) {
-                                centerY + realY * zoomY
-                            } else {
-                                null
-                            }
-                        }.map { (x, y) ->
-                            x to when (y) {
-                                null -> null
-                                else -> min(max(y, .0 - height), .0 + 2 * height)
-                            }
-                        }.map(::listOf).reduce { acc, current ->
-                            val (currentX, currentY) = current[0]
-
-                            if (acc.size == 1) {
-                                return@reduce acc + current
-                            }
-
-                            val (prevX, prevY) = acc.last()
-                            val subAcc = acc.subList(0, acc.lastIndex)
-                            if (currentY == null && prevY == null) {
-                                return@reduce subAcc + current
-                            }
-
-                            val (prevPrevX, prevPrevY) = acc[acc.size - 2]
-                            if (currentY == null || prevY == null || prevPrevY == null) {
-                                return@reduce acc + current
-                            }
-
-                            val isOnLine = abs((currentX - prevPrevX) * (prevY - prevPrevY) /
-                                    (prevX - prevPrevX) + prevPrevY - currentY) < 0.01
-
-                            return@reduce if (isOnLine) {
-                                subAcc + current
-                            } else {
-                                acc + current
-                            }
-                        }.toList()
-
-                        val path = Path2D.Double()
-                        for (i in points.indices) {
-                            val prev = points.getOrNull(i - 1)
-                            val cur = points[i]
-
-                            val (curX, curY) = cur
-                            if (prev?.second == null || curY == null) {
-                                if (curY != null) {
-                                    path.moveTo(curX, curY)
-                                    path.lineTo(curX, curY)
-                                }
-
-                                continue
-                            }
-
-                            val next = points.getOrNull(i + 1)
-                            val prevPrev = points.getOrNull(i - 2)
-                            val (prevX, prevY) = prev.first to prev.second!!
-                            if (prevPrev?.second == null || next?.second == null) {
-                                path.lineTo(curX, curY)
-                                continue
-                            }
-
-                            val (prevPrevX, prevPrevY) = prevPrev.first to prevPrev.second!!
-                            val (nextX, nextY) = next.first to next.second!!
-
-                            val a = (nextY - curY) / (nextX - curX)
-                            val b = (prevY - prevPrevY) / (prevX - prevPrevX)
-
-                            val y = (curY + a * (prevPrevX - curX - prevPrevY / b)) / (1 - a / b)
-                            val x = (y - prevPrevY) / b + prevPrevX
-
-                            if (x < prevX || x > curX || y < prevY || y > curY) {
-                                path.lineTo(curX, curY)
-                                continue
-                            }
-
-                            path.quadTo(x, y, curX, curY)
-                        }
-
-                        return@supplyAsync path to color
-                    })
-                }
-
-                CompletableFuture.allOf(*futures.toTypedArray()).join()
                 graphics.stroke = BasicStroke(2f)
+            }
 
-                for (future in futures) {
-                    val (path, color) = future.get()
+            for ((function, color) in functions) {
+                futures.add(CompletableFuture.runAsync {
+                    var realX = store.plotAbscissaBegin ?: .0
+                    var prevY: Int? = null
 
-                    graphics.color = color
-                    graphics.draw(path)
-                }
+                    for (x in 0 until width) {
+                        realX += realXStep
 
-                graphics.stroke = BasicStroke(1f)
-            } else {
-                val futures = mutableListOf<CompletableFuture<Void>>()
+                        val realResult = function.evaluate(mapOf(Store.ABSCISSA_VARIABLE to realX))
 
-                if (graphics is Graphics2D) {
-                    graphics.stroke = BasicStroke(2f)
-                }
+                        synchronized(graphics) {
+                            val actualPrevY = prevY
 
-                for ((function, color) in functions) {
-                    futures.add(CompletableFuture.runAsync {
-                        var realX = store.plotAbscissaBegin ?: .0
-                        var prevY: Int? = null
+                            graphics.color = color
+                            if (realResult.isFinite()) {
+                                val y = (centerY + realResult * zoomY).toInt()
 
-                        for (x in 0 until width) {
-                            realX += realXStep
-
-                            val realResult = function.evaluate(mapOf(store.plotAbscissaVariable to realX))
-
-                            synchronized(graphics) {
-                                val actualPrevY = prevY
-
-                                graphics.color = color
-                                if (realResult.isFinite()) {
-                                    val y = (centerY + realResult * zoomY).toInt()
-
-                                    if (actualPrevY != null) {
-                                        graphics.drawLine(x - 1, actualPrevY, x, y)
-                                    }
-
-                                    prevY = y
+                                if (actualPrevY != null) {
+                                    graphics.drawLine(x - 1, actualPrevY, x, y)
                                 }
+
+                                prevY = y
                             }
                         }
-                    })
-                }
+                    }
+                })
+            }
 
-                CompletableFuture.allOf(*futures.toTypedArray()).join()
+            CompletableFuture.allOf(*futures.toTypedArray()).join()
 
-                if (graphics is Graphics2D) {
-                    graphics.stroke = BasicStroke(1f)
-                }
+            if (graphics is Graphics2D) {
+                graphics.stroke = BasicStroke(1f)
             }
         }
 
-        // Interpolation points
-        if (store.function.isValid && store.function.variables.size == 1) {
-            val variable = store.function.variables.first()
+        // Derivative points
+        if (store.derivativePoints != null) {
+            for ((realX, realY) in store.derivativePoints) {
+                val x = (centerX + realX * zoomX).toInt()
+                val y = (centerY + realY * zoomY).toInt()
 
-            for (realX in store.interpolationPoints) {
-                val y = centerY + store.function.evaluate(mapOf(variable to realX)) * zoomY
-
-                if (!y.isFinite()) {
-                    continue
-                }
-
-                graphics.color = POINTS_COLOR
-                graphics.fillArc((centerX + realX * zoomX - 2).toInt(), (y - 2).toInt(), 5, 5, 0, 360)
-            }
-        }
-
-        // Value points
-        for (realX in store.valuePoints) {
-            val x = (centerX + realX * zoomX).toInt()
-
-            listOf(
-                    store.functionValues?.get(realX) to store.functionColor,
-                    store.interpolationValues?.get(realX) to store.interpolationColor
-            ).filter { (realY, _) -> realY != null && realY.isFinite() }.map { (realY, color) ->
-                (centerY + realY!! * zoomY).toInt() to color
-            }.forEach { (y, color) ->
                 graphics.color = POINTS_COLOR
                 graphics.fillArc(x - 3, y - 3, 7, 7, 0, 360)
 
-                graphics.color = color
+                graphics.color = store.derivativeInterpolationColor
                 graphics.fillArc(x - 2, y - 2, 5, 5, 0, 360)
             }
         }

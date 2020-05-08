@@ -1,4 +1,4 @@
-package ru.byprogminer.compmath.lab4.gui.util
+package ru.byprogminer.compmath.lab5.gui.util
 
 import java.awt.Image
 import javax.swing.ImageIcon

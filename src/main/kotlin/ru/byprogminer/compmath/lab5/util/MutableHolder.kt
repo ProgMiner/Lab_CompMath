@@ -1,4 +1,4 @@
-package ru.byprogminer.compmath.lab4.util
+package ru.byprogminer.compmath.lab5.util
 
 interface MutableHolder<T>: Holder<T> {
 

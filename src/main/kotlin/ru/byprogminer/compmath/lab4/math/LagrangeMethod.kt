@@ -2,7 +2,7 @@ package ru.byprogminer.compmath.lab4.math
 
 import ru.byprogminer.compmath.lab4.expression.Expression
 import ru.byprogminer.compmath.lab4.expression.InvalidExpression
-import ru.byprogminer.compmath.lab4.util.toPlainString
+import ru.byprogminer.compmath.lab5.util.toPlainString
 
 object LagrangeMethod: InterpolationMethod {
 

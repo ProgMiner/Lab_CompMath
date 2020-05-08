@@ -1,4 +1,4 @@
-package ru.byprogminer.compmath.lab4.gui.util
+package ru.byprogminer.compmath.lab5.gui.util
 
 import javax.swing.event.DocumentEvent
 import javax.swing.event.DocumentListener

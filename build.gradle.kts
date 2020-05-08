@@ -14,7 +14,7 @@ version = "1.0-SNAPSHOT"
 
 tasks.jar {
     manifest {
-        attributes["Main-Class"] = "ru.byprogminer.compmath.lab4.MainKt"
+        attributes["Main-Class"] = "ru.byprogminer.compmath.lab5.MainKt"
     }
 }
 

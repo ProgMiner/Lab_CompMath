@@ -168,7 +168,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         )
         controlPanel.add(detailsPanel, GridBagConstraints(0, 2, 1, 1, .0, .0, GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 0), 0, 0))
 
-        resultPanel.add(resultLabel, GridBagConstraints(0, 0, 1, 1, 1.0, .0, GridBagConstraints.WEST, GridBagConstraints.NONE, Insets(0, 0, 5, 5), 0, 0))
+        resultPanel.add(resultLabel, GridBagConstraints(0, 0, 1, 1, 1.0, .0, GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE, Insets(0, 0, 5, 5), 0, 0))
 
         resultColorButton.preferredSize = Dimension(20, 20)
         resultColorButton.minimumSize = Dimension(20, 20)
@@ -182,6 +182,8 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         resultPanel.add(resultColorButton, GridBagConstraints(1, 0, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.NONE, Insets(0, 0, 5, 0), 0, 0))
 
         resultArea.isEditable = false
+        resultArea.lineWrap = true
+        resultArea.wrapStyleWord = true
         resultArea.font = computerModernFont
         resultPanel.add(resultAreaPane, GridBagConstraints(0, 1, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 0, 0), 0, 0))
         controlPanel.add(resultPanel, GridBagConstraints(0, 3, 1, 1, .0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 0, 0), 0, 0))
@@ -321,8 +323,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
             onStoreChangeRun = true
 
             // expression
-            val expressionValid = store.expression.toString().trim() == "" ||
-                    store.variables.none { it == "x" || it == "y" }
+            val expressionValid = store.expression.toString().trim() == "" || store.expressionValid
             expressionField.background = when (expressionValid) {
                 true -> defaultTextFieldBackgroundColor
                 else -> INVALID_VALUE_COLOR

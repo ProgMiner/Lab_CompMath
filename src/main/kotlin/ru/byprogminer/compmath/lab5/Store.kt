@@ -28,10 +28,8 @@ data class Store(
         const val ORDINATE_VARIABLE = "y"
     }
 
-    val variables: Set<String>
-        get() = if (expression.isValid) {
-            expression.variables
-        } else {
-            emptySet()
+    val expressionValid: Boolean
+        get() = expression.isValid && expression.variables.all {
+            it == ABSCISSA_VARIABLE || it == ORDINATE_VARIABLE
         }
 }

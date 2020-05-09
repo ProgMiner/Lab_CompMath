@@ -18,6 +18,13 @@ object LagrangeMethod: InterpolationMethod {
         return LagrangePolynomial(pointList, values, variable)
     }
 
+    override fun interpolate(points: Map<Double, Double>, variable: String): Expression {
+        val pointList = points.keys.toList()
+
+        val values = pointList.map(points::getValue)
+        return LagrangePolynomial(pointList, values, variable)
+    }
+
     private class LagrangePolynomial(
             private val points: List<Double>,
             private val values: List<Double>,

@@ -29,10 +29,10 @@ fun main() {
             InvalidExpression(""),
             randomColor(),
 
-            -100.0,
-            100.0,
-            -100.0,
-            100.0
+            -10.0,
+            10.0,
+            -10.0,
+            10.0
     ))
 
     store.onChange.listeners.add { oldStore, storeHolder ->

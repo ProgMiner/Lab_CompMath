@@ -277,7 +277,7 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
                 val centerOrdinate = store.plotOrdinateBegin + intervalOrdinate / 2
 
                 val intervalOrdinateForAbscissa = intervalAbscissa * height / width
-                val intervalAbscissaForOrdinate = intervalOrdinate * width / height.toLong()
+                val intervalAbscissaForOrdinate = intervalOrdinate * width / height
 
                 val areaForAbscissa = intervalAbscissa * intervalOrdinateForAbscissa
                 val areaForOrdinate = intervalAbscissaForOrdinate * intervalOrdinate
@@ -298,7 +298,6 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
             }
         }
         plotButtonsPanel.add(plotButtonsFitButton, GridBagConstraints(0, 0, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 0), 0, 0))
-
         plotPanel.add(plotButtonsPanel, GridBagConstraints(6, 1, 1, 3, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 0, 0), 0, 0))
 
         _contentPane.add(plotPanel, GridBagConstraints(1, 0, 1, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 0, 0), 0, 0))
@@ -306,14 +305,20 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         contentPane = _contentPane
         pack()
 
-        val plotSide = max(plotPanel.width, plotPanel.height)
-        plotPanel.preferredSize = Dimension(plotSide, plotSide)
-        pack()
+        thread {
+            onStoreChange(store)
+            store.onChange.listeners.addWithoutValue(this::onStoreChange)
 
-        minimumSize = size
+            SwingUtilities.invokeLater {
+                val plotSide = max(plotPlot.width, plotPlot.height)
+                plotPlot.preferredSize = Dimension(plotSide, plotSide)
+                plotPlot.size = Dimension(plotSide, plotSide)
+                pack()
 
-        thread { onStoreChange(store) }
-        store.onChange.listeners.addWithoutValue(this::onStoreChange)
+                minimumSize = size
+                pack()
+            }
+        }
     }
 
     private fun onStoreChange(storeHolder: ReactiveHolder<Store>) {

@@ -50,7 +50,8 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
     private val detailsOrderField = JTextField(5)
     private val resultPanel = JPanel(GridBagLayout())
     private val resultLabel = JLabel("Result:")
-    private val resultColorButton = JButton()
+    private val resultRungeKuttaColorButton = JButton()
+    private val resultAdamsColorButton = JButton()
     private val resultArea = JTextArea(3, 15)
     private val resultAreaPane = JScrollPane(resultArea)
     private val plotPanel = JPanel(GridBagLayout())
@@ -156,7 +157,10 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
 
         detailsOrderField.document.addDocumentListener(documentAdapter { manualChange {
             store.mutateIfOther { store ->
-                store.copy(order = detailsOrderField.text.toIntOrNull())
+                store.copy(order = detailsOrderField.text.toIntOrNull().let { when {
+                    it == null || it <= 0 -> null
+                    else -> it
+                } })
             }
         } })
         detailsOrderField.font = computerModernFont
@@ -170,22 +174,33 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
 
         resultPanel.add(resultLabel, GridBagConstraints(0, 0, 1, 1, 1.0, .0, GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE, Insets(0, 0, 5, 5), 0, 0))
 
-        resultColorButton.preferredSize = Dimension(20, 20)
-        resultColorButton.minimumSize = Dimension(20, 20)
-        resultColorButton.addActionListener {
-            val newColor = JColorChooser.showDialog(this@MainWindow, "Choose derivative plot color", store.get().derivativeInterpolationColor)
+        resultRungeKuttaColorButton.preferredSize = Dimension(20, 20)
+        resultRungeKuttaColorButton.minimumSize = Dimension(20, 20)
+        resultRungeKuttaColorButton.addActionListener {
+            val newColor = JColorChooser.showDialog(this@MainWindow, "Choose Runge-Kutta solution plot color", store.get().adamsSolutionInterpolationColor)
 
             if (newColor != null) {
-                store.mutateIfOther { store -> store.copy(derivativeInterpolationColor = newColor) }
+                store.mutateIfOther { store -> store.copy(rungeKuttaSolutionInterpolationColor = newColor) }
             }
         }
-        resultPanel.add(resultColorButton, GridBagConstraints(1, 0, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.NONE, Insets(0, 0, 5, 0), 0, 0))
+        resultPanel.add(resultRungeKuttaColorButton, GridBagConstraints(1, 0, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.NONE, Insets(0, 0, 5, 5), 0, 0))
+
+        resultAdamsColorButton.preferredSize = Dimension(20, 20)
+        resultAdamsColorButton.minimumSize = Dimension(20, 20)
+        resultAdamsColorButton.addActionListener {
+            val newColor = JColorChooser.showDialog(this@MainWindow, "Choose Adams solution plot color", store.get().adamsSolutionInterpolationColor)
+
+            if (newColor != null) {
+                store.mutateIfOther { store -> store.copy(adamsSolutionInterpolationColor = newColor) }
+            }
+        }
+        resultPanel.add(resultAdamsColorButton, GridBagConstraints(2, 0, 1, 1, .0, .0, GridBagConstraints.CENTER, GridBagConstraints.NONE, Insets(0, 0, 5, 0), 0, 0))
 
         resultArea.isEditable = false
         resultArea.lineWrap = true
         resultArea.wrapStyleWord = true
         resultArea.font = computerModernFont
-        resultPanel.add(resultAreaPane, GridBagConstraints(0, 1, 2, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 0, 0), 0, 0))
+        resultPanel.add(resultAreaPane, GridBagConstraints(0, 1, 3, 1, 1.0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 0, 0), 0, 0))
         controlPanel.add(resultPanel, GridBagConstraints(0, 3, 1, 1, .0, 1.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, Insets(0, 0, 0, 0), 0, 0))
         _contentPane.add(controlPanel, GridBagConstraints(0, 0, 1, 1, .0, 1.0, GridBagConstraints.NORTH, GridBagConstraints.VERTICAL, Insets(0, 0, 0, 5), 0, 0))
 
@@ -352,11 +367,14 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
             updateText(detailsOrderField, store.order, String::toIntOrNull, Int?::toStringOrNull)
             updateBackground(detailsOrderField, store.order)
 
-            // derivativeInterpolation
-            updateText(resultArea, store.derivativeInterpolation) { toString() }
+            // rungeKuttaSolutionInterpolationColor
+            resultRungeKuttaColorButton.icon = ColorIconFactory.getIcon(store.rungeKuttaSolutionInterpolationColor)
 
-            // derivativeInterpolationColor
-            resultColorButton.icon = ColorIconFactory.getIcon(store.derivativeInterpolationColor)
+            // adamsSolutionInterpolation
+            updateText(resultArea, store.adamsSolutionInterpolation) { toString() }
+
+            // adamsSolutionInterpolationColor
+            resultAdamsColorButton.icon = ColorIconFactory.getIcon(store.adamsSolutionInterpolationColor)
 
             println("Store changed: $store")
         }
@@ -372,8 +390,8 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
             fromString: String.() -> T,
             toString: T.() -> String?
     ) {
-        if (component.text.fromString() != value) {
-            component.text = value.toString()
+        if (value != null && component.text.fromString() != value) {
+            component.text = (value as T).toString()
         }
     }
 
@@ -382,8 +400,8 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
             value: T,
             toString: T.() -> String?
     ) {
-        if (component.text != value.toString()) {
-            component.text = value.toString()
+        if (value != null && component.text != (value as T).toString()) {
+            component.text = (value as T).toString()
         }
     }
     private fun <T> updateBackground(

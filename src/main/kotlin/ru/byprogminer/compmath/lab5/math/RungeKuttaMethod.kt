@@ -8,13 +8,12 @@ object RungeKuttaMethod: OrderedCauchyProblemMethod(4) {
             function: Expression,
             startX: Double,
             startY: Double,
-            length: Double,
+            step: Double,
             stepsCount: Int,
             variableX: String,
             variableY: String
     ): Map<Double, Double> {
         val f = { x: Double, y: Double -> -function.evaluate(mapOf(variableX to x, variableY to y)) }
-        val step = length / stepsCount
 
         return generateSequence(startX to startY) { (prevX, prevY) ->
             val k0 = f(prevX, prevY)

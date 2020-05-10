@@ -116,8 +116,8 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
 
         // Lines to derivative points
         graphics.color = POINTS_COLOR
-        if (store.derivativePoints != null) {
-            for ((realX, realY) in store.derivativePoints) {
+        listOfNotNull(store.rungeKuttaSolutionPoints, store.adamsSolutionPoints).forEach { points ->
+            for ((realX, realY) in points) {
                 val x = (centerX + realX * zoomX).toInt()
 
                 val y = sortedSetOf(
@@ -222,7 +222,8 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
 
         // Plots
         val functions = listOf(
-                store.derivativeInterpolation to store.derivativeInterpolationColor
+                store.rungeKuttaSolutionInterpolation to store.rungeKuttaSolutionInterpolationColor,
+                store.adamsSolutionInterpolation to store.adamsSolutionInterpolationColor
         ).filter { (f, _) -> f.isValid }
 
         val realXStep = 1 / zoomX
@@ -272,7 +273,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
                         } else {
                             acc + current
                         }
-                    }.toList()
+                    }
 
                     val path = Path2D.Double()
                     for (i in points.indices) {
@@ -372,15 +373,18 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
         }
 
         // Derivative points
-        if (store.derivativePoints != null) {
-            for ((realX, realY) in store.derivativePoints) {
+        sequenceOf(
+                store.rungeKuttaSolutionPoints to store.rungeKuttaSolutionInterpolationColor,
+                store.adamsSolutionPoints to store.adamsSolutionInterpolationColor
+        ).forEach { (points, color) ->
+            for ((realX, realY) in points ?: emptyMap()) {
                 val x = (centerX + realX * zoomX).toInt()
                 val y = (centerY + realY * zoomY).toInt()
 
                 graphics.color = POINTS_COLOR
                 graphics.fillArc(x - 3, y - 3, 7, 7, 0, 360)
 
-                graphics.color = store.derivativeInterpolationColor
+                graphics.color = color
                 graphics.fillArc(x - 2, y - 2, 5, 5, 0, 360)
             }
         }
@@ -405,7 +409,7 @@ class Plot(private val store: ReactiveHolder<Store>): JPanel(null), ComponentLis
         val baseTenPower = log10(baseGridStep)
         val basePoweredTen = 10.0.pow(floor(baseTenPower))
 
-        return listOf(basePoweredTen, basePoweredTen * 2, basePoweredTen * 5)
+        return sequenceOf(basePoweredTen, basePoweredTen * 2, basePoweredTen * 5)
                 .map { step -> step to abs(step - baseGridStep) / baseGridStep }
                 .minBy { (_, dev) -> dev }!!.first
     }

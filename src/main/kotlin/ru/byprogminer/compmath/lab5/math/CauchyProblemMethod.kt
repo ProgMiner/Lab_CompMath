@@ -13,4 +13,14 @@ interface CauchyProblemMethod {
             variableX: String,
             variableY: String
     ): Map<Double, Double>
+
+    fun solve(
+            function: Expression,
+            startX: Double,
+            startY: Double,
+            step: Double,
+            stepsCount: Int,
+            variableX: String,
+            variableY: String
+    ): Map<Double, Double>
 }

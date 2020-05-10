@@ -12,9 +12,13 @@ data class Store(
         val precision: Double?,
         val order: Int?,
 
-        val derivativePoints: Map<Double, Double>?,
-        val derivativeInterpolation: Expression,
-        val derivativeInterpolationColor: Color,
+        val rungeKuttaSolutionPoints: Map<Double, Double>?,
+        val rungeKuttaSolutionInterpolation: Expression,
+        val rungeKuttaSolutionInterpolationColor: Color,
+
+        val adamsSolutionPoints: Map<Double, Double>?,
+        val adamsSolutionInterpolation: Expression,
+        val adamsSolutionInterpolationColor: Color,
 
         val plotAbscissaBegin: Double?,
         val plotAbscissaEnd: Double?,

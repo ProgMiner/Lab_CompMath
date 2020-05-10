@@ -14,19 +14,10 @@ abstract class AbstractCauchyProblemMethod: CauchyProblemMethod {
             variableY: String
     ): Map<Double, Double> {
         val length = endX - startX
+        val stepsCount = calcStepsCount(length, precision)
 
-        return solve(function, startX, startY, length, calcStepsCount(length, precision), variableX, variableY)
+        return solve(function, startX, startY, length / stepsCount, stepsCount, variableX, variableY)
     }
-
-    abstract fun solve(
-            function: Expression,
-            startX: Double,
-            startY: Double,
-            length: Double,
-            stepsCount: Int,
-            variableX: String,
-            variableY: String
-    ): Map<Double, Double>
 
     abstract fun calcStepsCount(length: Double, precision: Double): Int
 }

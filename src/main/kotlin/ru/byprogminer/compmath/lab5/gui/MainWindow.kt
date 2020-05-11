@@ -10,7 +10,6 @@ import ru.byprogminer.compmath.lab5.gui.util.documentAdapter
 import ru.byprogminer.compmath.lab5.gui.util.scale
 import ru.byprogminer.compmath.lab5.util.ReactiveHolder
 import ru.byprogminer.compmath.lab5.util.toPlainString
-import ru.byprogminer.compmath.lab5.util.toStringOrNull
 import java.awt.*
 import javax.swing.*
 import javax.swing.border.TitledBorder
@@ -38,16 +37,13 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
     private val startPointXField = JTextField(5)
     private val startPointYLabel = JLabel("<html>y<sub><small>0</small></sub> =</html>")
     private val startPointYField = JTextField(5)
-    private val detailsPanel = JPanel(GridBagLayout())
-    private val detailsEndXPanel = JPanel(GridBagLayout())
-    private val detailsEndXLabel = JLabel("<html>x<sub><small>n</small></sub> =</html>")
-    private val detailsEndXField = JTextField(5)
-    private val detailsPrecisionPanel = JPanel(GridBagLayout())
-    private val detailsPrecisionLabel = JLabel("Precision:")
-    private val detailsPrecisionField = JTextField(5)
-    private val detailsOrderPanel = JPanel(GridBagLayout())
-    private val detailsOrderLabel = JLabel("Order:")
-    private val detailsOrderField = JTextField(5)
+    private val otherPanel = JPanel(GridBagLayout())
+    private val otherEndXPanel = JPanel(GridBagLayout())
+    private val otherEndXLabel = JLabel("<html>x<sub><small>n</small></sub> =</html>")
+    private val otherEndXField = JTextField(5)
+    private val otherPrecisionPanel = JPanel(GridBagLayout())
+    private val otherPrecisionLabel = JLabel("Precision:")
+    private val otherPrecisionField = JTextField(5)
     private val resultPanel = JPanel(GridBagLayout())
     private val resultLabel = JLabel("Result:")
     private val resultRungeKuttaColorButton = JButton()
@@ -130,47 +126,34 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
         )
         controlPanel.add(startPointPanel, GridBagConstraints(0, 1, 1, 1, .0, .0, GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 0), 0, 0))
 
-        detailsEndXLabel.font = computerModernFont
-        detailsEndXPanel.add(detailsEndXLabel, GridBagConstraints(0, 0, 1, 1, .0, .0, GridBagConstraints.BASELINE, GridBagConstraints.NONE, Insets(0, 0, 0, 5), 0, 0))
+        otherEndXLabel.font = computerModernFont
+        otherEndXPanel.add(otherEndXLabel, GridBagConstraints(0, 0, 1, 1, .0, .0, GridBagConstraints.BASELINE, GridBagConstraints.NONE, Insets(0, 0, 0, 5), 0, 0))
 
-        detailsEndXField.document.addDocumentListener(documentAdapter { manualChange {
+        otherEndXField.document.addDocumentListener(documentAdapter { manualChange {
             store.mutateIfOther { store ->
-                store.copy(endX = detailsEndXField.text.toDoubleOrNull())
+                store.copy(endX = otherEndXField.text.toDoubleOrNull())
             }
         } })
-        detailsEndXField.font = computerModernFont
-        detailsEndXPanel.add(detailsEndXField, GridBagConstraints(1, 0, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 0), 0, 0))
-        detailsPanel.add(detailsEndXPanel, GridBagConstraints(0, 0, 1, 1, 1.0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 0), 0, 0))
+        otherEndXField.font = computerModernFont
+        otherEndXPanel.add(otherEndXField, GridBagConstraints(1, 0, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 0), 0, 0))
+        otherPanel.add(otherEndXPanel, GridBagConstraints(0, 0, 1, 1, 1.0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 0), 0, 0))
 
-        detailsPrecisionPanel.add(detailsPrecisionLabel, GridBagConstraints(0, 0, 1, 1, .0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 5), 0, 0))
+        otherPrecisionPanel.add(otherPrecisionLabel, GridBagConstraints(0, 0, 1, 1, .0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 5), 0, 0))
 
-        detailsPrecisionField.document.addDocumentListener(documentAdapter { manualChange {
+        otherPrecisionField.document.addDocumentListener(documentAdapter { manualChange {
             store.mutateIfOther { store ->
-                store.copy(precision = detailsPrecisionField.text.toDoubleOrNull())
+                store.copy(precision = otherPrecisionField.text.toDoubleOrNull())
             }
         } })
-        detailsPrecisionField.font = computerModernFont
-        detailsPrecisionPanel.add(detailsPrecisionField, GridBagConstraints(1, 0, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 0), 0, 0))
-        detailsPanel.add(detailsPrecisionPanel, GridBagConstraints(0, 1, 1, 1, 1.0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 0), 0, 0))
+        otherPrecisionField.font = computerModernFont
+        otherPrecisionPanel.add(otherPrecisionField, GridBagConstraints(1, 0, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 0), 0, 0))
+        otherPanel.add(otherPrecisionPanel, GridBagConstraints(0, 1, 1, 1, 1.0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 0), 0, 0))
 
-        detailsOrderPanel.add(detailsOrderLabel, GridBagConstraints(0, 0, 1, 1, .0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 5), 0, 0))
-
-        detailsOrderField.document.addDocumentListener(documentAdapter { manualChange {
-            store.mutateIfOther { store ->
-                store.copy(order = detailsOrderField.text.toIntOrNull().let { when {
-                    it == null || it <= 0 -> null
-                    else -> it
-                } })
-            }
-        } })
-        detailsOrderField.font = computerModernFont
-        detailsOrderPanel.add(detailsOrderField, GridBagConstraints(1, 0, 1, 1, 1.0, .0, GridBagConstraints.BASELINE, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 0), 0, 0))
-        detailsPanel.add(detailsOrderPanel, GridBagConstraints(0, 2, 1, 1, 1.0, .0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, Insets(0, 0, 0, 0), 0, 0))
-        detailsPanel.border = BorderFactory.createCompoundBorder(
-                BorderFactory.createTitledBorder("Details"),
+        otherPanel.border = BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder("Other"),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)
         )
-        controlPanel.add(detailsPanel, GridBagConstraints(0, 2, 1, 1, .0, .0, GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 0), 0, 0))
+        controlPanel.add(otherPanel, GridBagConstraints(0, 2, 1, 1, .0, .0, GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, Insets(0, 0, 5, 0), 0, 0))
 
         resultPanel.add(resultLabel, GridBagConstraints(0, 0, 1, 1, 1.0, .0, GridBagConstraints.SOUTHWEST, GridBagConstraints.NONE, Insets(0, 0, 5, 5), 0, 0))
 
@@ -352,8 +335,8 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
             mapOf(
                     startPointXField to store.startX, // startX
                     startPointYField to store.startY, // startY
-                    detailsEndXField to store.endX, // endX
-                    detailsPrecisionField to store.precision, // precision
+                    otherEndXField to store.endX, // endX
+                    otherPrecisionField to store.precision, // precision
                     plotAbscissaBeginField to store.plotAbscissaBegin, // plotAbscissaBegin
                     plotAbscissaEndField to store.plotAbscissaEnd, // plotAbscissaEnd
                     plotOrdinateBeginField to store.plotOrdinateBegin, // plotOrdinateBegin
@@ -362,10 +345,6 @@ class MainWindow(store: ReactiveHolder<Store>): JFrame("$APP_NAME v$APP_VERSION"
                 updateText(field, value, String::toDoubleOrNull, Double?::toPlainString)
                 updateBackground(field, value)
             }
-
-            // order
-            updateText(detailsOrderField, store.order, String::toIntOrNull, Int?::toStringOrNull)
-            updateBackground(detailsOrderField, store.order)
 
             // rungeKuttaSolutionInterpolationColor
             resultRungeKuttaColorButton.icon = ColorIconFactory.getIcon(store.rungeKuttaSolutionInterpolationColor)

@@ -27,17 +27,16 @@ fun main() {
             1.0,
 
             0.1,
-            4,
-
             null,
+
             InvalidExpression(""),
             Color(255 - adamsColor.red, 255 - adamsColor.green, 255 - adamsColor.blue),
-
             null,
+
             InvalidExpression(""),
             adamsColor,
-
             -10.0,
+
             10.0,
             -10.0,
             10.0
@@ -51,8 +50,7 @@ fun main() {
                 st.startX != oldStore.startX ||
                 st.startY != oldStore.startY ||
                 st.endX != oldStore.endX ||
-                st.precision != oldStore.precision ||
-                st.order != oldStore.order
+                st.precision != oldStore.precision
         ) {
             storeHolder.mutateIfOther { s ->
                 s.copy(
@@ -84,28 +82,24 @@ fun main() {
 
                 val rungeKuttaInterpolation = LagrangeMethod.interpolate(rungeKuttaPoints, Store.ABSCISSA_VARIABLE)
 
-                val adamsPoints = st.order?.run {
-                    AdamsMethod.solve(
-                            st.expression,
-                            st.startX,
-                            st.startY,
-                            st.endX,
-                            st.precision,
-                            Store.ABSCISSA_VARIABLE,
-                            Store.ORDINATE_VARIABLE
-                    )
-                }
+                val adamsPoints = AdamsMethod.solve(
+                        st.expression,
+                        st.startX,
+                        st.startY,
+                        st.endX,
+                        st.precision,
+                        Store.ABSCISSA_VARIABLE,
+                        Store.ORDINATE_VARIABLE
+                )
 
-                val adamsInterpolation = adamsPoints?.run {
-                    LagrangeMethod.interpolate(adamsPoints, Store.ABSCISSA_VARIABLE)
-                }
+                val adamsInterpolation = LagrangeMethod.interpolate(adamsPoints, Store.ABSCISSA_VARIABLE)
 
                 storeHolder.mutateIfOther { s ->
                     s.copy(
                             rungeKuttaSolutionPoints = rungeKuttaPoints,
                             rungeKuttaSolutionInterpolation = rungeKuttaInterpolation,
-                            adamsSolutionPoints = adamsPoints ?: s.adamsSolutionPoints,
-                            adamsSolutionInterpolation = adamsInterpolation ?: s.adamsSolutionInterpolation
+                            adamsSolutionPoints = adamsPoints,
+                            adamsSolutionInterpolation = adamsInterpolation
                     )
                 }
             }

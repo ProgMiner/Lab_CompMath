@@ -10,7 +10,6 @@ data class Store(
         val endX: Double?,
 
         val precision: Double?,
-        val order: Int?,
 
         val rungeKuttaSolutionPoints: Map<Double, Double>?,
         val rungeKuttaSolutionInterpolation: Expression,

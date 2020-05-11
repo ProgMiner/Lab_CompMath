@@ -16,12 +16,12 @@ object RungeKuttaMethod: OrderedCauchyProblemMethod(4) {
         val f = { x: Double, y: Double -> -function.evaluate(mapOf(variableX to x, variableY to y)) }
 
         return generateSequence(startX to startY) { (prevX, prevY) ->
-            val k0 = f(prevX, prevY)
-            val k1 = f(prevX + step / 2, prevY + k0 / 2)
-            val k2 = f(prevX + step / 2, prevY + k1 / 2)
-            val k3 = f(prevX + step, prevY + k2)
+            val k1 = f(prevX, prevY)
+            val k2 = f(prevX + step / 2, prevY + step * k1 / 2)
+            val k3 = f(prevX + step / 2, prevY + step * k2 / 2)
+            val k4 = f(prevX + step, prevY + step * k3)
 
-            return@generateSequence (prevX + step) to (prevY + step * (k0 + 2 * k1 + 2 * k2 + k3) / 6)
+            return@generateSequence (prevX + step) to (prevY + step * (k1 + 2 * k2 + 2 * k3 + k4) / 6)
         }.take(stepsCount + 1).toMap()
     }
 }

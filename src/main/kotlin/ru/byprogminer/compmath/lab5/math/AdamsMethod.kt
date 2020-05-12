@@ -44,17 +44,16 @@ object AdamsMethod: OrderedCauchyProblemMethod(4) {
             }
 
             for (i in 4..stepsCount) {
-                val (d1, d2, d3) = Triple(
-                        values[i - 1] - values[i - 2],
-                        values[i - 1] - 2 * values[i - 2] + values[i - 3],
-                        values[i - 1] - 3 * values[i - 2] + 3 * values[i - 3] - values[i - 4]
-                )
-
                 val fi = values[i - 1]
+                val fi1 = values[i - 2]
+                val fi2 = values[i - 3]
+                val fi3 = values[i - 4]
+
+                val d1 = fi - fi1
+                val d2 = fi - 2 * fi1 + fi2
+                val d3 = fi - 3 * fi1 + 3 * fi2 - fi3
                 val point = points[i].copy(second = points[i - 1].second +
-                        step * fi + step * step * d1 * fi / 2 +
-                        5 * step * step * step * d2 * fi / 12 +
-                        3 * step * step * step * step * d3 * fi / 8)
+                        step * (fi + step * (d1 / 2 + step * (5 * d2 / 12 + step * 3 * d3 / 8))))
 
                 points[i] = point
                 values[i] = f(point.first, point.second)
